@@ -26,10 +26,7 @@ case class Job(id: UUID, schedule: CronSchedule, run: () => Unit, limitMissedRun
         _lastTick = Some(now)
       } else if (limitMissedRuns > 0) {
         if (
-          !runing &&
-          schedule
-            .upcoming(_lastTick.get).take(limitMissedRuns)
-            .exists(event => event.toEpochMilli > now.toEpochMilli)
+          schedule.upcoming(_lastTick.get).take(limitMissedRuns).exists(event => event.toEpochMilli > now.toEpochMilli)
         ) {
           Future {
             runing = true
@@ -39,12 +36,7 @@ case class Job(id: UUID, schedule: CronSchedule, run: () => Unit, limitMissedRun
         }
         _lastTick = Some(now)
       } else {
-        if (
-          !runing &&
-          schedule
-            .upcoming(_lastTick.get)
-            .exists(event => event.toEpochMilli > now.toEpochMilli)
-        ) {
+        if (schedule.upcoming(_lastTick.get).exists(event => event.toEpochMilli > now.toEpochMilli)) {
           Future {
             runing = true
             run()
