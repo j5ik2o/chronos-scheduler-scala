@@ -29,7 +29,6 @@ val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
     schedule = CronSchedule("*/1 * * * *", zoneId),
     run = { () =>
       println(s"run job: $counter")
-      counter += 1
     }
   )
 )
