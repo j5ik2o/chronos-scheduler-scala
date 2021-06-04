@@ -34,6 +34,10 @@ val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
   )
 )
 
+while(true) {
+  jobScheduler.tick()
+  Thread.sleep(1000 * 60)
+}
 ```
 
 ## License
