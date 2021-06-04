@@ -23,23 +23,20 @@ libraryDependencies += Seq(
 ## Usage
 
 ```scala
-val cronSchedule   = CronSchedule("*/1 * * * *", ZoneId.systemDefault())
-val actuals        = cronSchedule.upcoming(Instant.now()).take(10)
-assert(actuals(0) == start)
-assert(actuals(1) == start.plus(Duration.ofMinutes(1)))
-// ...
-actuals.foreach(println)
+val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
+  Job(
+    id = UUID.randomUUID(),
+    schedule = CronSchedule("*/1 * * * *", zoneId),
+    run = { () =>
+      println(s"run job: $counter")
+    }
+  )
+)
 
-// 2021-06-03T22:33:16.093Z
-// 2021-06-03T22:34:16.093Z
-// 2021-06-03T22:35:16.093Z
-// 2021-06-03T22:36:16.093Z
-// 2021-06-03T22:37:16.093Z
-// 2021-06-03T22:38:16.093Z
-// 2021-06-03T22:39:16.093Z
-// 2021-06-03T22:40:16.093Z
-// 2021-06-03T22:41:16.093Z
-// 2021-06-03T22:42:16.093Z
+while(true) {
+  jobScheduler.tick()
+  Thread.sleep(1000 * 60)
+}
 ```
 
 ## License
