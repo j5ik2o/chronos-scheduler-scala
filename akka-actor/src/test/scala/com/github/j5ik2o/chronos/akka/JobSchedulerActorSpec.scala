@@ -31,7 +31,7 @@ class JobSchedulerActorSpec extends AnyFunSuite {
       reply.ref
     )
 
-    reply.expectMessage(JobSchedulerProtocol.AddJobSucceeded())
+    reply.expectMessage(JobSchedulerProtocol.AddJobSucceeded)
 
     jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
     Thread.sleep(1000)

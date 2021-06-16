@@ -8,8 +8,8 @@ import java.time.Instant
 
 object JobProtocol {
   sealed trait Command
-  case class Tick() extends Command
-  case class Run()  extends Command
+  case object Tick extends Command
+  case object Run  extends Command
 }
 
 object JobActor {
@@ -19,9 +19,9 @@ object JobActor {
   ): Behavior[JobProtocol.Command] = {
     Behaviors.setup[JobProtocol.Command] { _ =>
       Behaviors.receiveMessagePartial {
-        case JobProtocol.Tick() =>
+        case JobProtocol.Tick =>
           Behaviors.same
-        case JobProtocol.Run() =>
+        case JobProtocol.Run =>
           job.run()
           notStarted(job)(lastTick)
       }
@@ -32,18 +32,18 @@ object JobActor {
       lastTick: Option[Instant]
   ): Behavior[JobProtocol.Command] = {
     Behaviors.setup { ctx =>
-      Behaviors.receiveMessagePartial { case JobProtocol.Tick() =>
+      Behaviors.receiveMessagePartial { case JobProtocol.Tick =>
         val now = Instant.now()
         if (lastTick.isEmpty) notStarted(job)(Some(now))
         else if (job.limitMissedRuns > 0)
           if (job.schedule.upcoming(lastTick.get).take(job.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {
-            ctx.self ! JobProtocol.Run()
+            ctx.self ! JobProtocol.Run
             started(job)(Some(now))
           } else
             notStarted(job)(Some(now))
         else {
           if (job.schedule.upcoming(lastTick.get).exists(_.toEpochMilli > now.toEpochMilli)) {
-            ctx.self ! JobProtocol.Run()
+            ctx.self ! JobProtocol.Run
             started(job)(Some(now))
           } else
             notStarted(job)(Some(now))
