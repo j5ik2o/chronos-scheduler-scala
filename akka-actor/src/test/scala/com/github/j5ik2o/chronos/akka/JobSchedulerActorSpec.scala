@@ -1,7 +1,6 @@
 package com.github.j5ik2o.chronos.akka
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
-import com.github.j5ik2o.chronos.akka.JobSchedulerActor.Protocol.{ AddJob, AddJobReply, AddJobSucceeded, Tick }
 import com.github.j5ik2o.chronos.core.Job
 import com.github.j5ik2o.cron.CronSchedule
 import org.scalatest.funsuite.AnyFunSuite
@@ -18,8 +17,8 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     val id                   = UUID.randomUUID()
     val jobSchedulerActorRef = testKit.spawn(JobSchedulerActor(id))
 
-    val reply = testKit.createTestProbe[AddJobReply]()
-    jobSchedulerActorRef ! AddJob(
+    val reply = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
+    jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(
       id,
       Job(
         id = UUID.randomUUID(),
@@ -32,13 +31,13 @@ class JobSchedulerActorSpec extends AnyFunSuite {
       reply.ref
     )
 
-    reply.expectMessage(AddJobSucceeded())
+    reply.expectMessage(JobSchedulerProtocol.AddJobSucceeded())
 
-    jobSchedulerActorRef ! Tick(id)
+    jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
     Thread.sleep(1000)
-    jobSchedulerActorRef ! Tick(id)
+    jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
     Thread.sleep(1000)
-    jobSchedulerActorRef ! Tick(id)
+    jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
     Thread.sleep(1000)
 
     assert(counter == 2)
