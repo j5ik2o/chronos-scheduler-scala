@@ -1,11 +1,10 @@
-package com.github.j5ik2o.chronos
+package com.github.j5ik2o.chronos.core
 
 import com.github.j5ik2o.cron.CronSchedule
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.time.ZoneId
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class JobSchedulerSpec extends AnyFunSuite {
   test("job") {

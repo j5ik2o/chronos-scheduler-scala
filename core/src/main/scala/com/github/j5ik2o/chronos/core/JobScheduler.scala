@@ -1,7 +1,8 @@
-package com.github.j5ik2o.chronos
+package com.github.j5ik2o.chronos.core
+
+import com.github.j5ik2o.chronos.core.Ticker.TickerOps
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext
 
 case class JobScheduler(id: UUID, jobs: Vector[Job] = Vector.empty) {
 
@@ -11,7 +12,7 @@ case class JobScheduler(id: UUID, jobs: Vector[Job] = Vector.empty) {
   def removeJob(jobId: UUID): JobScheduler =
     copy(jobs = jobs.filterNot(_.id == jobId))
 
-  def tick()(implicit ec: ExecutionContext): Unit = {
+  def tick(): Unit = {
     jobs.foreach(_.tick())
   }
 

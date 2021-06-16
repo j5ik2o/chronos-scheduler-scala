@@ -59,10 +59,10 @@ lazy val baseSettings = Seq(
   }
 )
 
-val root = (project in file("."))
+val core = (project in file("core"))
   .settings(baseSettings)
   .settings(
-    name := "chronos-scheduler-scala",
+    name := "chronos-scheduler-scala-core",
     libraryDependencies ++= Seq(
       "com.github.j5ik2o" %% "chronos-parser-scala" % "1.0.3",
       "org.slf4j"          % "slf4j-api"            % "1.7.30",
@@ -70,6 +70,26 @@ val root = (project in file("."))
       "ch.qos.logback"     % "logback-classic"      % "1.2.3" % Test
     )
   )
+
+val AkkaVersion = "2.6.15"
+
+val `akka-actor` = (project in file("akka-actor"))
+  .settings(baseSettings)
+  .settings(
+    name := "chronos-scheduler-scala-akka-actor",
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor-typed"         % AkkaVersion,
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
+      "org.scalatest"     %% "scalatest"                % "3.2.9"     % Test,
+      "ch.qos.logback"     % "logback-classic"          % "1.2.3"     % Test
+    )
+  ).dependsOn(core)
+
+val root = (project in file("."))
+  .settings(baseSettings)
+  .settings(
+    name := "chronos-scheduler-scala-root"
+  ).aggregate(core, `akka-actor`)
 
 // --- Custom commands
 addCommandAlias("lint", ";scalafmtCheck;test:scalafmtCheck;scalafmtSbtCheck;scalafixAll --check")
