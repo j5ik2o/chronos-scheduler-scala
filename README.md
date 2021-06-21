@@ -61,7 +61,10 @@ object Main extends App {
     var counter = 0
     val id      = UUID.randomUUID()
 
-    val jobSchedulerActorRef = ctx.spawn(JobSchedulerActor(id, Some(1.seconds)), "job-scheduler-actor")
+    val jobSchedulerActorRef = ctx.spawn(
+      JobSchedulerActor(id, Some(1.seconds)), 
+      "job-scheduler-actor"
+    )
 
     jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(
       id,
