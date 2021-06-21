@@ -16,7 +16,8 @@ Add the following to your sbt build (2.13.x):
 val version = "..."
 
 libraryDependencies += Seq(
-  "com.github.j5ik2o" %% "chronos-scheduler-scala" % version,
+  "com.github.j5ik2o" %% "chronos-scheduler-scala-core" % version,
+  "com.github.j5ik2o" %% "chronos-scheduler-scala-akka-actor" % version
 )
 ```
 
