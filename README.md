@@ -51,12 +51,12 @@ The actor module provides an asynchronous non-blocking API.
 ```scala
 object Main extends App {
 
-  val system = ActorSystem(apply(), "job-scheduler-actor-main")
+  val system = ActorSystem(apply, "job-scheduler-actor-main")
 
   sealed trait Command
   case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
 
-  def apply() = Behaviors.setup[Command] { ctx =>
+  def apply: Behavior[Command] = Behaviors.setup[Command] { ctx =>
 
     var counter = 0
     val id      = UUID.randomUUID()
