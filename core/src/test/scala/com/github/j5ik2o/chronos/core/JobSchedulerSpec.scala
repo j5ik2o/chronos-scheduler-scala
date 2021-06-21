@@ -5,29 +5,28 @@ import org.scalatest.funsuite.AnyFunSuite
 
 import java.time.ZoneId
 import java.util.UUID
+import scala.concurrent.duration._
 
 class JobSchedulerSpec extends AnyFunSuite {
   test("job") {
     val zoneId  = ZoneId.systemDefault()
     var counter = 0
-
-    val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
-      Job(
-        id = UUID.randomUUID(),
-        schedule = CronSchedule("*/1 * * * *", zoneId),
-        run = { () =>
-          println(s"run job: $counter")
-          counter += 1
-        }
-      )
+    val job = Job(
+      id = UUID.randomUUID(),
+      schedule = CronSchedule("*/1 * * * *", zoneId),
+      tickInterval = 1.seconds,
+      run = { () =>
+        println(s"run job: $counter")
+        counter += 1
+      }
     )
+    val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(job)
 
     jobScheduler.tick()
-    Thread.sleep(1000)
+    Thread.sleep(job.tickInterval.toMillis)
     jobScheduler.tick()
-    Thread.sleep(1000)
+    Thread.sleep(job.tickInterval.toMillis)
     jobScheduler.tick()
-    Thread.sleep(1000)
 
     assert(counter == 2)
   }

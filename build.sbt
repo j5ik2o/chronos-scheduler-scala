@@ -85,11 +85,20 @@ val `akka-actor` = (project in file("akka-actor"))
     )
   ).dependsOn(core)
 
+val `example` = (project in file("example"))
+  .settings(baseSettings)
+  .settings(
+    name := "chronos-scheduler-scala-example",
+    libraryDependencies ++= Seq(
+      "ch.qos.logback" % "logback-classic" % "1.2.3"
+    )
+  ).dependsOn(core, `akka-actor`)
+
 val root = (project in file("."))
   .settings(baseSettings)
   .settings(
-    name := "chronos-scheduler-scala-root"
-  ).aggregate(core, `akka-actor`)
+    name := "chronos-scheduler-scala-example"
+  ).aggregate(core, `akka-actor`, `example`)
 
 // --- Custom commands
 addCommandAlias("lint", ";scalafmtCheck;test:scalafmtCheck;scalafmtSbtCheck;scalafixAll --check")

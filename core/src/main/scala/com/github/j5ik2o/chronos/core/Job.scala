@@ -2,16 +2,24 @@ package com.github.j5ik2o.chronos.core
 
 import com.github.j5ik2o.cron.CronSchedule
 
-import java.time.Instant
+import java.time.{ Duration, Instant }
 import java.util.UUID
+import scala.concurrent.duration._
 
-case class Job(id: UUID, schedule: CronSchedule, run: () => Unit, limitMissedRuns: Int = 5) {
+case class Job(
+    id: UUID,
+    schedule: CronSchedule,
+    limitMissedRuns: Int = 5,
+    tickInterval: FiniteDuration = 1.minutes,
+    run: () => Unit
+) {
   private var _lastTick: Option[Instant] = None
 
   def lastTick_=(value: Option[Instant]): Unit = {
     _lastTick = value
   }
   def lastTick: Option[Instant] = _lastTick
+
 }
 
 object Job {
@@ -20,24 +28,24 @@ object Job {
 
     override def tick(self: Job): Unit = {
       val now = Instant.now()
-      if (self.lastTick.isEmpty) {
-        self.lastTick = Some(now)
-      } else if (self.limitMissedRuns > 0) {
-        if (
-          self.schedule
-            .upcoming(self.lastTick.get).take(self.limitMissedRuns).exists(event =>
-              event.toEpochMilli > now.toEpochMilli
-            )
-        ) {
-          self.run()
-        }
-        self.lastTick = Some(now)
-      } else {
-        if (self.schedule.upcoming(self.lastTick.get).exists(event => event.toEpochMilli > now.toEpochMilli)) {
-          self.run()
-        }
-        self.lastTick = Some(now)
+      self.lastTick match {
+        case None =>
+          self.lastTick = Some(now)
+        case Some(lt) if lt.plus(Duration.ofMillis(self.tickInterval.toMillis)).toEpochMilli <= now.toEpochMilli =>
+          if (self.limitMissedRuns > 0) {
+            if (self.schedule.upcoming(lt).take(self.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {
+              self.run()
+            }
+            self.lastTick = Some(now)
+          } else {
+            if (self.schedule.upcoming(lt).exists(_.toEpochMilli > now.toEpochMilli)) {
+              self.run()
+            }
+            self.lastTick = Some(now)
+          }
+        case _ =>
       }
+
     }
   }
 }

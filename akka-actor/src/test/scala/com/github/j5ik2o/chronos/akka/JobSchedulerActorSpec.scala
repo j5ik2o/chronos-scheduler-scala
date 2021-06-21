@@ -7,6 +7,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 import java.time.ZoneId
 import java.util.UUID
+import scala.concurrent.duration._
 
 class JobSchedulerActorSpec extends AnyFunSuite {
   val testKit: ActorTestKit = ActorTestKit()
@@ -18,27 +19,29 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     val jobSchedulerActorRef = testKit.spawn(JobSchedulerActor(id))
 
     val reply = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
+    val job = Job(
+      id = UUID.randomUUID(),
+      schedule = CronSchedule("*/1 * * * *", zoneId),
+      tickInterval = 1.seconds,
+      run = { () =>
+        println(s"run job: $counter")
+        counter += 1
+      }
+    )
     jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(
       id,
-      Job(
-        id = UUID.randomUUID(),
-        schedule = CronSchedule("*/1 * * * *", zoneId),
-        run = { () =>
-          println(s"run job: $counter")
-          counter += 1
-        }
-      ),
+      job,
       reply.ref
     )
 
     reply.expectMessage(JobSchedulerProtocol.AddJobSucceeded)
 
     jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
-    Thread.sleep(1000)
+    Thread.sleep(job.tickInterval.toMillis)
     jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
-    Thread.sleep(1000)
+    Thread.sleep(job.tickInterval.toMillis)
     jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
-    Thread.sleep(1000)
+    Thread.sleep(job.tickInterval.toMillis)
 
     assert(counter == 2)
   }
