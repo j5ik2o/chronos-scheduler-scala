@@ -33,7 +33,7 @@ var counter = 0
 val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
   Job(
     id = UUID.randomUUID(),
-    schedule = CronSchedule("*/1 * * * *", zoneId),
+    schedule = CronSchedule("*/1 * * * *", ZoneId.systemDefault()),
     run = { () =>
       println(s"run job: $counter")
       counter += 1
@@ -73,7 +73,7 @@ object Main extends App {
       id,
       Job(
         id = UUID.randomUUID(),
-        schedule = CronSchedule("*/1 * * * *", zoneId),
+        schedule = CronSchedule("*/1 * * * *", ZoneId.systemDefault()),
         run = { () =>
           println(s"run job: $counter")
           counter += 1
