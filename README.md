@@ -22,6 +22,10 @@ libraryDependencies += Seq(
 
 ## Usage
 
+### Core
+
+The core module provides a simple synchronous API.
+
 ```scala
 val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
   Job(
@@ -36,6 +40,45 @@ val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
 while(true) {
   jobScheduler.tick()
   Thread.sleep(1000 * 60)
+}
+```
+
+### Actor
+
+The actor module provides an asynchronous non-blocking API.
+
+```scala
+object Main extends App {
+
+  val system = ActorSystem(apply(), "job-scheduler-actor-main")
+
+  sealed trait Command
+  case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
+
+  def apply() = Behaviors.setup[Command] { ctx =>
+    val zoneId  = ZoneId.systemDefault()
+    var counter = 0
+    val id      = UUID.randomUUID()
+
+    val jobSchedulerActorRef = ctx.spawn(JobSchedulerActor(id, Some(1.seconds)), "job-scheduler-actor")
+
+    jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(
+      id,
+      Job(
+        id = UUID.randomUUID(),
+        schedule = CronSchedule("*/1 * * * *", zoneId),
+        run = { () =>
+          println(s"run job: $counter")
+          counter += 1
+        }
+      ),
+      ctx.messageAdapter[JobSchedulerProtocol.AddJobReply](ref => WrappedAddJobReply(ref))
+    )
+    Behaviors.receiveMessagePartial[Command] { case WrappedAddJobReply(AddJobSucceeded) =>
+      Behaviors.same
+    }
+  }
+
 }
 ```
 
