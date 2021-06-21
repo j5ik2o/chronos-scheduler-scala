@@ -56,7 +56,7 @@ object Main extends App {
   case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
 
   def apply() = Behaviors.setup[Command] { ctx =>
-    val zoneId  = ZoneId.systemDefault()
+
     var counter = 0
     val id      = UUID.randomUUID()
 
