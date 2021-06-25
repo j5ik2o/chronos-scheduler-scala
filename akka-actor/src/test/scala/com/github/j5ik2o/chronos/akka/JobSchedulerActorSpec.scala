@@ -10,6 +10,8 @@ import java.util.UUID
 import scala.concurrent.duration._
 
 class JobSchedulerActorSpec extends AnyFunSuite {
+  val testTimeFactor = sys.env.getOrElse("TEST_TIME_FACTOR", "1").toInt
+
   val testKit: ActorTestKit = ActorTestKit()
 
   test("job") {
@@ -22,7 +24,7 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     val job = Job(
       id = UUID.randomUUID(),
       schedule = CronSchedule("*/1 * * * *", zoneId),
-      tickInterval = 1.seconds,
+      tickInterval = 500.millis,
       run = { () =>
         println(s"run job: $counter")
         counter += 1
@@ -37,11 +39,11 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     reply.expectMessage(JobSchedulerProtocol.AddJobSucceeded)
 
     jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
-    Thread.sleep(job.tickInterval.toMillis)
+    Thread.sleep(job.tickInterval.toMillis * testTimeFactor)
     jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
-    Thread.sleep(job.tickInterval.toMillis)
+    Thread.sleep(job.tickInterval.toMillis * testTimeFactor)
     jobSchedulerActorRef ! JobSchedulerProtocol.Tick(id)
-    Thread.sleep(job.tickInterval.toMillis)
+    Thread.sleep(job.tickInterval.toMillis * testTimeFactor)
 
     assert(counter == 2)
   }
