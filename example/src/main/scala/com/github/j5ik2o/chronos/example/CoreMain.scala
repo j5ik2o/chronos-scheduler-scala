@@ -7,8 +7,8 @@ import java.time.ZoneId
 import java.util.UUID
 
 object CoreMain extends App {
-  val zoneId: ZoneId  = ZoneId.systemDefault()
-  var counter = 0
+  val zoneId: ZoneId = ZoneId.systemDefault()
+  var counter        = 0
 
   val jobScheduler: JobScheduler = JobScheduler(UUID.randomUUID()).addJob(
     Job(
