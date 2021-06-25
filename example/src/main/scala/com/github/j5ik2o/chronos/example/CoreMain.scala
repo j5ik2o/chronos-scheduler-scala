@@ -7,10 +7,10 @@ import java.time.ZoneId
 import java.util.UUID
 
 object CoreMain extends App {
-  val zoneId  = ZoneId.systemDefault()
+  val zoneId: ZoneId  = ZoneId.systemDefault()
   var counter = 0
 
-  val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
+  val jobScheduler: JobScheduler = JobScheduler(UUID.randomUUID()).addJob(
     Job(
       id = UUID.randomUUID(),
       schedule = CronSchedule("*/1 * * * *", zoneId),

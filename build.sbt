@@ -97,7 +97,7 @@ val `example` = (project in file("example"))
 val root = (project in file("."))
   .settings(baseSettings)
   .settings(
-    name := "chronos-scheduler-scala-example"
+    name := "chronos-scheduler-scala-root"
   ).aggregate(core, `akka-actor`, `example`)
 
 // --- Custom commands

@@ -5,7 +5,6 @@ import akka.actor.typed.scaladsl.Behaviors
 import com.github.j5ik2o.chronos.core.Job
 
 import java.time.{ Duration, Instant }
-import scala.concurrent.duration.DurationInt
 
 object JobProtocol {
   sealed trait Command

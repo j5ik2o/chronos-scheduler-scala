@@ -13,7 +13,7 @@ import scala.concurrent.duration._
 
 object AkkaActorMain extends App {
 
-  val system = ActorSystem(apply, "job-scheduler-actor-main")
+  val system: ActorSystem[Command] = ActorSystem(apply, "job-scheduler-actor-main")
 
   sealed trait Command
   case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
