@@ -10,7 +10,7 @@ import java.util.UUID
 import scala.concurrent.duration._
 
 class JobSchedulerActorSpec extends AnyFunSuite {
-  val testTimeFactor = sys.env.getOrElse("TEST_TIME_FACTOR", "1").toInt
+  val testTimeFactor: Int = sys.env.getOrElse("TEST_TIME_FACTOR", "1").toInt
 
   val testKit: ActorTestKit = ActorTestKit()
 
