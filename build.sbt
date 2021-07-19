@@ -67,7 +67,7 @@ val core = (project in file("core"))
       "com.github.j5ik2o" %% "chronos-parser-scala" % "1.0.12",
       "org.slf4j"          % "slf4j-api"            % "1.7.32",
       "org.scalatest"     %% "scalatest"            % "3.2.9" % Test,
-      "ch.qos.logback"     % "logback-classic"      % "1.2.3" % Test
+      "ch.qos.logback"     % "logback-classic"      % "1.2.4" % Test
     )
   )
 
@@ -81,7 +81,7 @@ val `akka-actor` = (project in file("akka-actor"))
       "com.typesafe.akka" %% "akka-actor-typed"         % AkkaVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
       "org.scalatest"     %% "scalatest"                % "3.2.9"     % Test,
-      "ch.qos.logback"     % "logback-classic"          % "1.2.3"     % Test
+      "ch.qos.logback"     % "logback-classic"          % "1.2.4"     % Test
     )
   ).dependsOn(core)
 
@@ -90,7 +90,7 @@ val `example` = (project in file("example"))
   .settings(
     name := "chronos-scheduler-scala-example",
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % "1.2.3"
+      "ch.qos.logback" % "logback-classic" % "1.2.4"
     )
   ).dependsOn(core, `akka-actor`)
 
