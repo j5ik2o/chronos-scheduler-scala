@@ -18,8 +18,8 @@ def crossScalacOptions(scalaVersion: String): Seq[String] =
 
 lazy val baseSettings = Seq(
   organization := "com.github.j5ik2o",
-  homepage := Some(url("https://github.com/j5ik2o/chronos-scheduler-scala")),
-  licenses := List("The MIT License" -> url("http://opensource.org/licenses/MIT")),
+  homepage     := Some(url("https://github.com/j5ik2o/chronos-scheduler-scala")),
+  licenses     := List("The MIT License" -> url("http://opensource.org/licenses/MIT")),
   developers := List(
     Developer(
       id = "j5ik2o",
@@ -44,11 +44,11 @@ lazy val baseSettings = Seq(
     Resolver.sonatypeRepo("releases")
   ),
   ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
-  semanticdbEnabled := true,
-  semanticdbVersion := scalafixSemanticdb.revision,
-  Test / publishArtifact := false,
-  Test / fork := true,
-  Test / parallelExecution := false,
+  semanticdbEnabled                      := true,
+  semanticdbVersion                      := scalafixSemanticdb.revision,
+  Test / publishArtifact                 := false,
+  Test / fork                            := true,
+  Test / parallelExecution               := false,
   Compile / doc / sources := {
     val old = (Compile / doc / sources).value
     if (scalaVersion.value == Versions.scala3Version) {
@@ -83,7 +83,8 @@ val `akka-actor` = (project in file("akka-actor"))
       "org.scalatest"     %% "scalatest"                % "3.2.9"     % Test,
       "ch.qos.logback"     % "logback-classic"          % "1.2.5"     % Test
     )
-  ).dependsOn(core)
+  )
+  .dependsOn(core)
 
 val `example` = (project in file("example"))
   .settings(baseSettings)
@@ -92,13 +93,15 @@ val `example` = (project in file("example"))
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.2.5"
     )
-  ).dependsOn(core, `akka-actor`)
+  )
+  .dependsOn(core, `akka-actor`)
 
 val root = (project in file("."))
   .settings(baseSettings)
   .settings(
     name := "chronos-scheduler-scala-root"
-  ).aggregate(core, `akka-actor`, `example`)
+  )
+  .aggregate(core, `akka-actor`, `example`)
 
 // --- Custom commands
 addCommandAlias("lint", ";scalafmtCheck;test:scalafmtCheck;scalafmtSbtCheck;scalafixAll --check")
