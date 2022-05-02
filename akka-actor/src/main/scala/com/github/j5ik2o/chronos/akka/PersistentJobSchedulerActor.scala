@@ -10,13 +10,13 @@ import java.util.UUID
 import scala.concurrent.duration.FiniteDuration
 
 object JobSchedulerEvents {
-  sealed trait Event
+  sealed trait Event extends CborSerializable
   case class JobAdded(schedulerId: UUID, jobRef: (UUID, ActorRef[JobProtocol.Command]), replyTo: ActorRef[AddJobReply])
       extends Event
   case class JobRemoved(schedulerId: UUID, jobID: UUID, replyTo: ActorRef[RemoveJobReply]) extends Event
 }
 
-class PersistentJobSchedulerActor {
+object PersistentJobSchedulerActor {
 
   sealed trait State
   case object EmptyState extends State
@@ -33,7 +33,7 @@ class PersistentJobSchedulerActor {
             case (EmptyState, JobSchedulerProtocol.AddJob(sid, job, replyTo)) =>
               val jobRef = ctx.spawn(JobActor(job), job.id.toString)
               Effect
-                .persist(JobSchedulerEvents.JobAdded(sid, job.id -> jobRef, replyTo)).thenReply(replyTo) { case _ =>
+                .persist(JobSchedulerEvents.JobAdded(sid, job.id -> jobRef, replyTo)).thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.AddJobSucceeded
                 }
             case (EmptyState, JobSchedulerProtocol.RemoveJob(sid, jobId, replyTo)) =>
@@ -50,9 +50,12 @@ class PersistentJobSchedulerActor {
               Effect.noReply
           },
           eventHandler = {
-            case (JustState(schedulerId, jobRefs), JobSchedulerEvents.JobAdded(_, entry, _)) =>
-              JustState(schedulerId, jobRefs + entry)
-            case (JustState(schedulerId, jobRefs), JobSchedulerEvents.JobRemoved(_, jobId, _)) =>
+            case (EmptyState, JobSchedulerEvents.JobAdded(_, entry, _)) =>
+              JustState(id, Map(entry))
+            case (JustState(schedulerId, jobRefs), JobSchedulerEvents.JobAdded(sid, entry, _)) if schedulerId == sid =>
+              JustState(id, jobRefs + entry)
+            case (JustState(schedulerId, jobRefs), JobSchedulerEvents.JobRemoved(sid, jobId, _))
+                if schedulerId == sid =>
               JustState(schedulerId, jobRefs - jobId)
           }
         )
