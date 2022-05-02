@@ -11,17 +11,17 @@ object JobSchedulerProtocol {
   sealed trait Command
   case class AddJob(schedulerId: UUID, job: Job, replyTo: ActorRef[AddJobReply]) extends Command
   sealed trait AddJobReply
-  case object AddJobSucceeded            extends AddJobReply
+  case object AddJobSucceeded extends AddJobReply
   case class AddJobFailed(ex: Throwable) extends AddJobReply
 
   case class RemoveJob(schedulerId: UUID, jobId: UUID, replyTo: ActorRef[RemoveJobReply]) extends Command
   sealed trait RemoveJobReply
-  case object RemoveJobSucceeded            extends RemoveJobReply
+  case object RemoveJobSucceeded extends RemoveJobReply
   case class RemoveJobFailed(ex: Throwable) extends RemoveJobReply
 
-  case class Tick(schedulerId: UUID)                                  extends Command
+  case class Tick(schedulerId: UUID) extends Command
   case class Stop(schedulerId: UUID, replyTo: ActorRef[Stopped.type]) extends Command
-  case object Stopped                                                 extends Command
+  case object Stopped extends Command
 }
 
 object JobSchedulerActor {

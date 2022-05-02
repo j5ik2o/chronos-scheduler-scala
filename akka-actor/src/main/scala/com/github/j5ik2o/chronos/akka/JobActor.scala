@@ -9,7 +9,7 @@ import java.time.{ Duration, Instant }
 object JobProtocol {
   sealed trait Command
   case object Tick extends Command
-  case object Run  extends Command
+  case object Run extends Command
 
 }
 
