@@ -2,7 +2,6 @@ package com.github.j5ik2o.chronos.akka
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import com.github.j5ik2o.chronos.core.Job
-import com.github.j5ik2o.cron.CronSchedule
 import com.typesafe.config.{ Config, ConfigFactory }
 import org.scalatest.freespec.AnyFreeSpecLike
 
@@ -38,7 +37,8 @@ class PersistentJobSchedulerActorSpec
 
       val job = Job(
         id = UUID.randomUUID(),
-        schedule = CronSchedule("*/1 * * * *", zoneId),
+        cronExpression = "*/1 * * * *",
+        zoneId,
         tickInterval = 500.millis,
         run = { () =>
           println(s"run job: $counter")

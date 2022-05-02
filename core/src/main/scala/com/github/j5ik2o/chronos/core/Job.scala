@@ -2,17 +2,22 @@ package com.github.j5ik2o.chronos.core
 
 import com.github.j5ik2o.cron.CronSchedule
 
-import java.time.{ Duration, Instant }
+import java.time.{ Duration, Instant, ZoneId }
 import java.util.UUID
 import scala.concurrent.duration._
 
 case class Job(
     id: UUID,
-    schedule: CronSchedule,
+    cronExpression: String,
+    zoneId: ZoneId,
     limitMissedRuns: Int = 5,
     tickInterval: FiniteDuration = 1.minutes,
-    run: () => Unit
+    @transient run: () => Unit
 ) {
+
+  @transient
+  val schedule: CronSchedule = CronSchedule(cronExpression, zoneId)
+
   private var _lastTick: Option[Instant] = None
 
   def lastTick_=(value: Option[Instant]): Unit = {

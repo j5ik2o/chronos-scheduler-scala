@@ -15,7 +15,8 @@ class JobSchedulerSpec extends AnyFunSuite {
     var counter = 0
     val job = Job(
       id = UUID.randomUUID(),
-      schedule = CronSchedule("*/1 * * * *", zoneId),
+      cronExpression = "*/1 * * * *",
+      zoneId,
       tickInterval = 500.millis,
       run = { () =>
         println(s"run job: $counter")

@@ -13,7 +13,8 @@ object CoreMain extends App {
   val jobScheduler: JobScheduler = JobScheduler(UUID.randomUUID()).addJob(
     Job(
       id = UUID.randomUUID(),
-      schedule = CronSchedule("*/1 * * * *", zoneId),
+      cronExpression = "*/1 * * * *",
+      zoneId,
       run = { () =>
         println(s"run job: $counter")
         counter += 1

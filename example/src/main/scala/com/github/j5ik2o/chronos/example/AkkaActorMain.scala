@@ -29,7 +29,8 @@ object AkkaActorMain extends App {
       id,
       Job(
         id = UUID.randomUUID(),
-        schedule = CronSchedule("*/1 * * * *", zoneId),
+        cronExpression = "*/1 * * * *",
+        zoneId,
         run = { () =>
           println(s"run job: $counter")
           counter += 1
