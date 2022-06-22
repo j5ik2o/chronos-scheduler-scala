@@ -5,7 +5,6 @@ import akka.actor.typed.{ ActorSystem, Behavior }
 import com.github.j5ik2o.chronos.akka.JobSchedulerProtocol.AddJobSucceeded
 import com.github.j5ik2o.chronos.akka.{ JobSchedulerActor, JobSchedulerProtocol }
 import com.github.j5ik2o.chronos.core.Job
-import com.github.j5ik2o.cron.CronSchedule
 
 import java.time.ZoneId
 import java.util.UUID

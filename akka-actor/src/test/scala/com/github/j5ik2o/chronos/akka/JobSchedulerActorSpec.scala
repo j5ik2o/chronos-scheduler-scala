@@ -2,7 +2,6 @@ package com.github.j5ik2o.chronos.akka
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import com.github.j5ik2o.chronos.core.Job
-import com.github.j5ik2o.cron.CronSchedule
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.time.ZoneId

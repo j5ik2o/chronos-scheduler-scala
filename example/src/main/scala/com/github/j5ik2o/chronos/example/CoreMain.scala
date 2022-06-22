@@ -1,7 +1,6 @@
 package com.github.j5ik2o.chronos.example
 
 import com.github.j5ik2o.chronos.core.{ Job, JobScheduler }
-import com.github.j5ik2o.cron.CronSchedule
 
 import java.time.ZoneId
 import java.util.UUID

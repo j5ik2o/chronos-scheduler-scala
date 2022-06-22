@@ -1,6 +1,5 @@
 package com.github.j5ik2o.chronos.core
 
-import com.github.j5ik2o.cron.CronSchedule
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.time.ZoneId
