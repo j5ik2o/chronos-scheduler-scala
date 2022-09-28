@@ -82,7 +82,7 @@ val `akka-actor` = (project in file("akka-actor"))
       "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
       "com.typesafe.akka" %% "akka-persistence-typed"     % AkkaVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed"   % AkkaVersion % Test,
-      "org.scalatest"     %% "scalatest"                  % "3.2.13"    % Test,
+      "org.scalatest"     %% "scalatest"                  % "3.2.14"    % Test,
       "ch.qos.logback"     % "logback-classic"            % "1.2.11"    % Test
     )
   )
