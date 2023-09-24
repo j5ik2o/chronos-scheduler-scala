@@ -66,7 +66,7 @@ val core = (project in file("core"))
     libraryDependencies ++= Seq(
       "com.github.j5ik2o" %% "chronos-parser-scala" % "1.0.119",
       "org.slf4j"          % "slf4j-api"            % "1.7.32",
-      "org.scalatest"     %% "scalatest"            % "3.2.9"  % Test,
+      "org.scalatest"     %% "scalatest"            % "3.2.17"  % Test,
       "ch.qos.logback"     % "logback-classic"      % "1.2.12" % Test
     )
   )
@@ -82,7 +82,7 @@ val `akka-actor` = (project in file("akka-actor"))
       "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
       "com.typesafe.akka" %% "akka-persistence-typed"     % AkkaVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed"   % AkkaVersion % Test,
-      "org.scalatest"     %% "scalatest"                  % "3.2.16"    % Test,
+      "org.scalatest"     %% "scalatest"                  % "3.2.17"    % Test,
       "ch.qos.logback"     % "logback-classic"            % "1.2.12"    % Test
     )
   )
