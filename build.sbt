@@ -66,7 +66,7 @@ val core = (project in file("core"))
     libraryDependencies ++= Seq(
       "com.github.j5ik2o" %% "chronos-parser-scala" % "1.0.119",
       "org.slf4j"          % "slf4j-api"            % "1.7.36",
-      "org.scalatest"     %% "scalatest"            % "3.2.17"  % Test,
+      "org.scalatest"     %% "scalatest"            % "3.2.17" % Test,
       "ch.qos.logback"     % "logback-classic"      % "1.4.11" % Test
     )
   )
