@@ -64,7 +64,7 @@ val core = (project in file("core"))
   .settings(
     name := "chronos-scheduler-scala-core",
     libraryDependencies ++= Seq(
-      "com.github.j5ik2o" %% "chronos-parser-scala" % "1.0.119",
+      "com.github.j5ik2o" %% "chronos-parser-scala" % "1.0.120",
       "org.slf4j"          % "slf4j-api"            % "1.7.36",
       "org.scalatest"     %% "scalatest"            % "3.2.17" % Test,
       "ch.qos.logback"     % "logback-classic"      % "1.4.11" % Test
