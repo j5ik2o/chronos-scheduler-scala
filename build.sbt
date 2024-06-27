@@ -71,7 +71,7 @@ val core = (project in file("core"))
     )
   )
 
-val AkkaVersion = "2.8.5"
+val AkkaVersion = "2.8.6"
 
 val `akka-actor` = (project in file("akka-actor"))
   .settings(baseSettings)
