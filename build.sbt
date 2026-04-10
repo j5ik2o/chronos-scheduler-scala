@@ -81,7 +81,7 @@ val `akka-actor` = (project in file("akka-actor"))
   .settings(baseSettings)
   .settings(
     name := "chronos-scheduler-scala-akka-actor",
-    crossScalaVersions := Seq(Versions.scala213Version),
+    crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor-typed"           % AkkaVersion,
       "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
@@ -115,7 +115,7 @@ val `example` = (project in file("example"))
   .settings(baseSettings)
   .settings(
     name := "chronos-scheduler-scala-example",
-    crossScalaVersions := Seq(Versions.scala213Version),
+    crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.5.32"
     )
