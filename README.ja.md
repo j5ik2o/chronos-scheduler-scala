@@ -1,38 +1,38 @@
 # chronos-scheduler-scala
 
-[Japanese](README.ja.md)
+[English](README.md)
 
-A job scheduler library for Scala.
+Scala 用のジョブスケジューラライブラリです。
 
 [![CI](https://github.com/j5ik2o/chronos-scheduler-scala/workflows/CI/badge.svg)](https://github.com/j5ik2o/chronos-scheduler-scala/actions?query=workflow%3ACI)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.j5ik2o/chronos-scheduler-scala-core_2.13)](https://central.sonatype.com/artifact/com.github.j5ik2o/chronos-scheduler-scala-core_2.13)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-## Requirements
+## 動作環境
 
-- JDK 17 or later
-- Scala 2.13.18 (core module also supports Scala 3.3.7)
-- akka-actor module requires Scala 2.13 only
+- JDK 17 以上
+- Scala 2.13.18（core モジュールは Scala 3.3.7 にも対応）
+- akka-actor モジュールは Scala 2.13 のみ
 
-## Installation
+## インストール
 
-Add the following to your sbt build:
+sbt ビルドに以下を追加してください:
 
 ```scala
 val version = "..."
 
 libraryDependencies += Seq(
   "com.github.j5ik2o" %% "chronos-scheduler-scala-core" % version,
-  "com.github.j5ik2o" %% "chronos-scheduler-scala-akka-actor" % version // Scala 2.13 only
+  "com.github.j5ik2o" %% "chronos-scheduler-scala-akka-actor" % version // Scala 2.13 のみ
 )
 ```
 
-## Usage
+## 使い方
 
 ### Core
 
-The core module provides a simple synchronous API.
+core モジュールはシンプルな同期 API を提供します。
 
 ```scala
 var counter = 0
@@ -56,7 +56,7 @@ while(true) {
 
 ### Actor
 
-The actor module provides an asynchronous non-blocking API using Akka Typed.
+actor モジュールは Akka Typed を使った非同期・ノンブロッキング API を提供します。
 
 ```scala
 object Main extends App {
@@ -96,6 +96,6 @@ object Main extends App {
 }
 ```
 
-## License
+## ライセンス
 
-MIT license ([LICENSE](LICENSE) or https://opensource.org/licenses/MIT)
+MIT ライセンス ([LICENSE](LICENSE) または https://opensource.org/licenses/MIT)
