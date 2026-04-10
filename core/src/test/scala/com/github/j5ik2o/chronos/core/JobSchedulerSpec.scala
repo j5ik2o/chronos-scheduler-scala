@@ -12,7 +12,7 @@ class JobSchedulerSpec extends AnyFunSuite {
   test("job") {
     val zoneId  = ZoneId.systemDefault()
     var counter = 0
-    val job = Job(
+    val job     = Job(
       id = UUID.randomUUID(),
       cronExpression = "*/1 * * * *",
       zoneId,
