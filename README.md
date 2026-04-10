@@ -12,8 +12,7 @@ A job scheduler library for Scala.
 ## Requirements
 
 - JDK 17 or later
-- Scala 2.13.18 (core module also supports Scala 3.3.7)
-- akka-actor module requires Scala 2.13 only
+- Scala 2.13.18 / Scala 3.3.7
 
 ## Installation
 
