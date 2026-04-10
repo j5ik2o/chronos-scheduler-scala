@@ -19,7 +19,7 @@ A job scheduler library for Scala.
 Add the following to your sbt build:
 
 ```scala
-val version = "..."
+val version = "<version>"
 
 libraryDependencies += Seq(
   "com.github.j5ik2o" %% "chronos-scheduler-scala-core" % version,
