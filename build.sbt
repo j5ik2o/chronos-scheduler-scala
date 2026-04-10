@@ -81,7 +81,7 @@ val `akka-actor` = (project in file("akka-actor"))
   .settings(baseSettings)
   .settings(
     name := "chronos-scheduler-scala-akka-actor",
-    crossScalaVersions := Seq(Versions.scala213Version),
+    crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor-typed"           % AkkaVersion,
       "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
@@ -93,11 +93,29 @@ val `akka-actor` = (project in file("akka-actor"))
   )
   .dependsOn(core)
 
+val PekkoVersion = "1.1.5"
+
+val `pekko-actor` = (project in file("pekko-actor"))
+  .settings(baseSettings)
+  .settings(
+    name := "chronos-scheduler-scala-pekko-actor",
+    crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
+    libraryDependencies ++= Seq(
+      "org.apache.pekko" %% "pekko-actor-typed"           % PekkoVersion,
+      "org.apache.pekko" %% "pekko-serialization-jackson" % PekkoVersion,
+      "org.apache.pekko" %% "pekko-persistence-typed"     % PekkoVersion,
+      "org.apache.pekko" %% "pekko-actor-testkit-typed"   % PekkoVersion % Test,
+      "org.scalatest"    %% "scalatest"                   % "3.2.20"     % Test,
+      "ch.qos.logback"    % "logback-classic"             % "1.5.32"     % Test
+    )
+  )
+  .dependsOn(core)
+
 val `example` = (project in file("example"))
   .settings(baseSettings)
   .settings(
     name := "chronos-scheduler-scala-example",
-    crossScalaVersions := Seq(Versions.scala213Version),
+    crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.5.32"
     )
@@ -111,7 +129,7 @@ val root = (project in file("."))
     crossScalaVersions := Seq(Versions.scala213Version),
     publish / skip := true
   )
-  .aggregate(core, `akka-actor`, `example`)
+  .aggregate(core, `akka-actor`, `pekko-actor`, `example`)
 
 // --- Custom commands
 addCommandAlias("lint", ";scalafmtCheck;test:scalafmtCheck;scalafmtSbtCheck;scalafixAll --check")
