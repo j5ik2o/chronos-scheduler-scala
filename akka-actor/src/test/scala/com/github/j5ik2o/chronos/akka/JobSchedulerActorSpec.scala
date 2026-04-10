@@ -20,7 +20,7 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     val jobSchedulerActorRef = testKit.spawn(JobSchedulerActor(id))
 
     val reply = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
-    val job = Job(
+    val job   = Job(
       id = UUID.randomUUID(),
       cronExpression = "*/1 * * * *",
       zoneId,
