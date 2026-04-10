@@ -8,7 +8,8 @@ def crossScalacOptions(scalaVersion: String): Seq[String] =
       Seq(
         "-source:3.0-migration",
         "-Xignore-scala2-macros",
-        "-Xtarget:17"
+        "-release",
+        "17"
       )
     case Some((2L, scalaMajor)) if scalaMajor >= 12 =>
       Seq(

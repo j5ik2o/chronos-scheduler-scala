@@ -31,7 +31,6 @@ jobs:
         mkdir -p ~/.sbt/1.0
         printf 'realm=Sonatype Nexus Repository Manager\nhost=central.sonatype.com\nuser=%s\npassword=%s\n' \
           "$SONATYPE_USERNAME" "$SONATYPE_PASSWORD" > ~/.sbt/1.0/sonatype_credentials
-        cat ~/.sbt/1.0/sonatype_credentials | sed 's/password=.*/password=***/'
     - name: Import GPG key
       run: |
         mkdir -p ~/.gnupg
