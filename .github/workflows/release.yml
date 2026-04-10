@@ -34,7 +34,8 @@ jobs:
         echo "use-agent" >> ~/.gnupg/gpg.conf
         echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
         chmod 600 ~/.gnupg/gpg.conf ~/.gnupg/gpg-agent.conf
-        gpg-agent --daemon || true
+        gpgconf --kill gpg-agent
+        gpgconf --launch gpg-agent
     - run: sbt -v ci-release
       env:
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}

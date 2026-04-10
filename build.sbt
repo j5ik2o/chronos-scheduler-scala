@@ -1,6 +1,7 @@
 import Dependencies.Versions
 
 ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / "1.0" / "sonatype_credentials")
+ThisBuild / dynverSonatypeSnapshots := true
 
 def crossScalacOptions(scalaVersion: String): Seq[String] =
   CrossVersion.partialVersion(scalaVersion) match {
@@ -116,6 +117,7 @@ val `example` = (project in file("example"))
   .settings(
     name := "chronos-scheduler-scala-example",
     crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
+    publish / skip := true,
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.5.32"
     )
