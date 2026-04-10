@@ -19,7 +19,7 @@ Scala 用のジョブスケジューラライブラリです。
 sbt ビルドに以下を追加してください:
 
 ```scala
-val version = "..."
+val version = "<version>"
 
 libraryDependencies += Seq(
   "com.github.j5ik2o" %% "chronos-scheduler-scala-core" % version,
