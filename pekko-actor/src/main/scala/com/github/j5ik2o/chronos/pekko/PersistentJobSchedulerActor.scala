@@ -11,16 +11,16 @@ import java.util.UUID
 import scala.concurrent.duration.FiniteDuration
 
 object JobSchedulerEvents {
-  sealed trait Event extends CborSerializable
-  case class JobAdded(schedulerId: UUID, job: Job, replyTo: ActorRef[AddJobReply]) extends Event
-  case class JobRemoved(schedulerId: UUID, jobID: UUID, replyTo: ActorRef[RemoveJobReply]) extends Event
+  private sealed trait Event extends CborSerializable
+  private final case class JobAdded(schedulerId: UUID, job: Job, replyTo: ActorRef[AddJobReply]) extends Event
+  private final case class JobRemoved(schedulerId: UUID, jobID: UUID, replyTo: ActorRef[RemoveJobReply]) extends Event
 }
 
 object PersistentJobSchedulerActor {
 
-  sealed trait State
-  case object EmptyState extends State
-  case class JustState(schedulerId: UUID, jobs: Map[UUID, Job]) extends State
+  private sealed trait State
+  private case object EmptyState extends State
+  private final case class JustState(schedulerId: UUID, jobs: Map[UUID, Job]) extends State
 
   def apply(id: UUID, tickInterval: Option[FiniteDuration] = None): Behavior[JobSchedulerProtocol.Command] = {
     Behaviors.setup { ctx =>
