@@ -29,7 +29,7 @@ jobs:
     - name: Configure Sonatype credentials
       run: |
         mkdir -p ~/.sbt/1.0
-        printf 'realm=Sonatype Nexus Repository Manager\nhost=central.sonatype.com\nuser=%s\npassword=%s\n' \
+        printf 'host=central.sonatype.com\nuser=%s\npassword=%s\n' \
           "$SONATYPE_USERNAME" "$SONATYPE_PASSWORD" > ~/.sbt/1.0/sonatype_credentials
     - name: Import GPG key
       run: |
