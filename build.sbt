@@ -1,19 +1,24 @@
 import Dependencies.Versions
 
+ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / "1.0" / "sonatype_credentials")
+
 def crossScalacOptions(scalaVersion: String): Seq[String] =
   CrossVersion.partialVersion(scalaVersion) match {
     case Some((3L, _)) =>
       Seq(
         "-source:3.0-migration",
-        "-Xignore-scala2-macros"
+        "-Xignore-scala2-macros",
+        "-Xtarget:17"
       )
     case Some((2L, scalaMajor)) if scalaMajor >= 12 =>
       Seq(
         "-Ydelambdafy:method",
-        "-target:jvm-1.8",
+        "-release",
+        "17",
         "-Yrangepos",
         "-Ywarn-unused"
       )
+    case _ => Seq.empty
   }
 
 lazy val baseSettings = Seq(
@@ -39,11 +44,10 @@ lazy val baseSettings = Seq(
       "-language:_"
     ) ++ crossScalacOptions(scalaVersion.value)
   ),
-  resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
-  resolvers ++= Resolver.sonatypeOssRepos("releases"),
-  ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
+  javacOptions ++= Seq("--release", "17"),
+  resolvers += Resolver.sonatypeCentralSnapshots,
   semanticdbEnabled := true,
-  semanticdbVersion := scalafixSemanticdb.revision,
+  semanticdbVersion := "4.14.2",
   Test / publishArtifact := false,
   Test / fork := true,
   Test / parallelExecution := false,
@@ -61,6 +65,7 @@ val core = (project in file("core"))
   .settings(baseSettings)
   .settings(
     name := "chronos-scheduler-scala-core",
+    crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
     libraryDependencies ++= Seq(
       "com.github.j5ik2o" %% "chronos-parser-scala" % "1.1.5",
       "org.slf4j"          % "slf4j-api"            % "2.0.17",
@@ -75,6 +80,7 @@ val `akka-actor` = (project in file("akka-actor"))
   .settings(baseSettings)
   .settings(
     name := "chronos-scheduler-scala-akka-actor",
+    crossScalaVersions := Seq(Versions.scala213Version),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor-typed"           % AkkaVersion,
       "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion,
@@ -90,6 +96,7 @@ val `example` = (project in file("example"))
   .settings(baseSettings)
   .settings(
     name := "chronos-scheduler-scala-example",
+    crossScalaVersions := Seq(Versions.scala213Version),
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.5.32"
     )
@@ -99,7 +106,9 @@ val `example` = (project in file("example"))
 val root = (project in file("."))
   .settings(baseSettings)
   .settings(
-    name := "chronos-scheduler-scala-root"
+    name := "chronos-scheduler-scala-root",
+    crossScalaVersions := Seq(Versions.scala213Version),
+    publish / skip := true
   )
   .aggregate(core, `akka-actor`, `example`)
 
