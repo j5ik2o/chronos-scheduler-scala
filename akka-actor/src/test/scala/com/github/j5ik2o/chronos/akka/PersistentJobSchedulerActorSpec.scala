@@ -62,5 +62,58 @@ class PersistentJobSchedulerActorSpec
 
       assert(counter == 2)
     }
+
+    "add multiple jobs in JustState" in {
+      val zoneId = ZoneId.systemDefault()
+      val id     = UUID.randomUUID()
+
+      val jobSchedulerActorRef = testKit.spawn(PersistentJobSchedulerActor(id))
+      val reply1               = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
+      val reply2               = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
+
+      val job1 = Job(
+        id = UUID.randomUUID(),
+        cronExpression = "*/1 * * * *",
+        zoneId,
+        tickInterval = 500.millis,
+        run = { () => () }
+      )
+      val job2 = Job(
+        id = UUID.randomUUID(),
+        cronExpression = "*/1 * * * *",
+        zoneId,
+        tickInterval = 500.millis,
+        run = { () => () }
+      )
+
+      jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(id, job1, reply1.ref)
+      reply1.expectMessage(JobSchedulerProtocol.AddJobSucceeded)
+
+      jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(id, job2, reply2.ref)
+      reply2.expectMessage(JobSchedulerProtocol.AddJobSucceeded)
+    }
+
+    "remove job in JustState" in {
+      val zoneId = ZoneId.systemDefault()
+      val id     = UUID.randomUUID()
+
+      val jobSchedulerActorRef = testKit.spawn(PersistentJobSchedulerActor(id))
+      val addReply             = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
+      val removeReply          = testKit.createTestProbe[JobSchedulerProtocol.RemoveJobReply]()
+
+      val job = Job(
+        id = UUID.randomUUID(),
+        cronExpression = "*/1 * * * *",
+        zoneId,
+        tickInterval = 500.millis,
+        run = { () => () }
+      )
+
+      jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(id, job, addReply.ref)
+      addReply.expectMessage(JobSchedulerProtocol.AddJobSucceeded)
+
+      jobSchedulerActorRef ! JobSchedulerProtocol.RemoveJob(id, job.id, removeReply.ref)
+      removeReply.expectMessage(JobSchedulerProtocol.RemoveJobSucceeded)
+    }
   }
 }
