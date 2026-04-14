@@ -51,7 +51,9 @@ object PersistentJobSchedulerActor {
                   JobSchedulerProtocol.RemoveJobSucceeded
                 }
             case (JustState(schedulerId, _), JobSchedulerProtocol.Stop(sid, replyTo)) if schedulerId == sid =>
-              Effect.reply(replyTo)(JobSchedulerProtocol.Stopped)
+              Effect.stop().thenReply(replyTo) { _ =>
+                JobSchedulerProtocol.Stopped
+              }
             case (JustState(schedulerId, jobs), JobSchedulerProtocol.Tick(sid)) if schedulerId == sid =>
               jobs.foreach { case (_, job) =>
                 val jobRef = ctx.child(job.id.toString) match {
