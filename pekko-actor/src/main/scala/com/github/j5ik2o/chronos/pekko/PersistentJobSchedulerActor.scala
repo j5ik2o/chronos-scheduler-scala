@@ -40,12 +40,12 @@ object PersistentJobSchedulerActor {
                 .persist(JobSchedulerEvents.JobRemoved(sid, jobId, replyTo)).thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.RemoveJobSucceeded
                 }
-            case (JustState(schedulerId, _), JobSchedulerProtocol.AddJob(sid, job, replyTo)) =>
+            case (JustState(schedulerId, _), JobSchedulerProtocol.AddJob(sid, job, replyTo)) if schedulerId == sid =>
               Effect
                 .persist(JobSchedulerEvents.JobAdded(sid, job, replyTo)).thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.AddJobSucceeded
                 }
-            case (JustState(schedulerId, _), JobSchedulerProtocol.RemoveJob(sid, jobId, replyTo)) =>
+            case (JustState(schedulerId, _), JobSchedulerProtocol.RemoveJob(sid, jobId, replyTo)) if schedulerId == sid =>
               Effect
                 .persist(JobSchedulerEvents.JobRemoved(sid, jobId, replyTo)).thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.RemoveJobSucceeded
