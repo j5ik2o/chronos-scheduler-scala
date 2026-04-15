@@ -45,7 +45,8 @@ object PersistentJobSchedulerActor {
                 .persist(JobSchedulerEvents.JobAdded(sid, job, replyTo)).thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.AddJobSucceeded
                 }
-            case (JustState(schedulerId, _), JobSchedulerProtocol.RemoveJob(sid, jobId, replyTo)) if schedulerId == sid =>
+            case (JustState(schedulerId, _), JobSchedulerProtocol.RemoveJob(sid, jobId, replyTo))
+                if schedulerId == sid =>
               Effect
                 .persist(JobSchedulerEvents.JobRemoved(sid, jobId, replyTo)).thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.RemoveJobSucceeded
