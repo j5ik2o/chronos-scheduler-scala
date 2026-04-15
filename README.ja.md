@@ -21,9 +21,11 @@ sbt ビルドに以下を追加してください:
 ```scala
 val version = "<version>"
 
-libraryDependencies += Seq(
+libraryDependencies ++= Seq(
   "com.github.j5ik2o" %% "chronos-scheduler-scala-core" % version,
-  "com.github.j5ik2o" %% "chronos-scheduler-scala-akka-actor" % version // Scala 2.13 のみ
+  // 以下のいずれかを選択:
+  "com.github.j5ik2o" %% "chronos-scheduler-scala-pekko-actor" % version,
+  "com.github.j5ik2o" %% "chronos-scheduler-scala-akka-actor" % version
 )
 ```
 
@@ -34,12 +36,14 @@ libraryDependencies += Seq(
 core モジュールはシンプルな同期 API を提供します。
 
 ```scala
+val zoneId: ZoneId = ZoneId.systemDefault()
 var counter = 0
 
 val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
   Job(
     id = UUID.randomUUID(),
-    schedule = CronSchedule("*/1 * * * *", ZoneId.systemDefault()),
+    cronExpression = "*/1 * * * *",
+    zoneId,
     run = { () =>
       println(s"run job: $counter")
       counter += 1
@@ -47,15 +51,15 @@ val jobScheduler = JobScheduler(UUID.randomUUID()).addJob(
   )
 )
 
-while(true) {
+while (true) {
   jobScheduler.tick()
-  Thread.sleep(1000 * 60)
+  Thread.sleep(1000)
 }
 ```
 
-### Actor
+### Pekko Actor
 
-actor モジュールは Akka Typed を使った非同期・ノンブロッキング API を提供します。
+pekko-actor モジュールは Apache Pekko Typed を使った非同期・ノンブロッキング API を提供します。
 
 ```scala
 object Main extends App {
@@ -66,12 +70,12 @@ object Main extends App {
   case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
 
   def apply: Behavior[Command] = Behaviors.setup[Command] { ctx =>
-
+    val zoneId  = ZoneId.systemDefault()
     var counter = 0
     val id      = UUID.randomUUID()
 
     val jobSchedulerActorRef = ctx.spawn(
-      JobSchedulerActor(id, Some(1.seconds)), 
+      JobSchedulerActor(id, Some(500.millis)),
       "job-scheduler-actor"
     )
 
@@ -79,7 +83,51 @@ object Main extends App {
       id,
       Job(
         id = UUID.randomUUID(),
-        schedule = CronSchedule("*/1 * * * *", ZoneId.systemDefault()),
+        cronExpression = "*/1 * * * *",
+        zoneId,
+        run = { () =>
+          println(s"run job: $counter")
+          counter += 1
+        }
+      ),
+      ctx.messageAdapter[JobSchedulerProtocol.AddJobReply](ref => WrappedAddJobReply(ref))
+    )
+    Behaviors.receiveMessagePartial[Command] { case WrappedAddJobReply(AddJobSucceeded) =>
+      Behaviors.same
+    }
+  }
+
+}
+```
+
+### Akka Actor
+
+akka-actor モジュールは Akka Typed を使った同等の API を提供します。
+
+```scala
+object Main extends App {
+
+  val system = ActorSystem(apply, "job-scheduler-actor-main")
+
+  sealed trait Command
+  case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
+
+  def apply: Behavior[Command] = Behaviors.setup[Command] { ctx =>
+    val zoneId  = ZoneId.systemDefault()
+    var counter = 0
+    val id      = UUID.randomUUID()
+
+    val jobSchedulerActorRef = ctx.spawn(
+      JobSchedulerActor(id, Some(500.millis)),
+      "job-scheduler-actor"
+    )
+
+    jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(
+      id,
+      Job(
+        id = UUID.randomUUID(),
+        cronExpression = "*/1 * * * *",
+        zoneId,
         run = { () =>
           println(s"run job: $counter")
           counter += 1
