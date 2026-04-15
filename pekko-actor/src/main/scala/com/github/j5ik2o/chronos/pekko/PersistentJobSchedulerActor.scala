@@ -7,6 +7,7 @@ import org.apache.pekko.persistence.typed.scaladsl.{ Effect, EventSourcedBehavio
 import com.github.j5ik2o.chronos.pekko.JobSchedulerProtocol.{ AddJobReply, RemoveJobReply }
 import com.github.j5ik2o.chronos.core.Job
 
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.duration.FiniteDuration
 
@@ -22,7 +23,11 @@ object PersistentJobSchedulerActor {
   case object EmptyState extends State
   case class JustState(schedulerId: UUID, jobs: Map[UUID, Job]) extends State
 
-  def apply(id: UUID, tickInterval: Option[FiniteDuration] = None): Behavior[JobSchedulerProtocol.Command] = {
+  def apply(
+      id: UUID,
+      tickInterval: Option[FiniteDuration] = None,
+      clock: () => Instant = () => Instant.now()
+  ): Behavior[JobSchedulerProtocol.Command] = {
     Behaviors.setup { ctx =>
       Behaviors.withTimers { timer =>
         tickInterval.foreach(d => timer.startTimerAtFixedRate(JobSchedulerProtocol.Tick(id), d))
@@ -59,7 +64,7 @@ object PersistentJobSchedulerActor {
               jobs.foreach { case (_, job) =>
                 val jobRef = ctx.child(job.id.toString) match {
                   case Some(ref) => ref.unsafeUpcast[JobProtocol.Command]
-                  case None      => ctx.spawn(JobActor(job), job.id.toString)
+                  case None      => ctx.spawn(JobActor(job, clock), job.id.toString)
                 }
                 jobRef ! JobProtocol.Tick
               }

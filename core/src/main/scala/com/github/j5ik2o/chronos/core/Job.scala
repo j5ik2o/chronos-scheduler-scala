@@ -18,12 +18,6 @@ case class Job(
   @transient
   val schedule: CronSchedule = CronSchedule(cronExpression, zoneId)
 
-  @transient
-  private var _clock: () => Instant = () => Instant.now()
-
-  def clock: () => Instant = _clock
-  def clock_=(value: () => Instant): Unit = { _clock = value }
-
   private var _lastTick: Option[Instant] = None
 
   def lastTick_=(value: Option[Instant]): Unit = {
@@ -38,7 +32,10 @@ object Job {
   implicit object JobTicker extends Ticker[Job] {
 
     override def tick(self: Job): Unit = {
-      val now = self.clock()
+      tickWithClock(self, Instant.now())
+    }
+
+    private[chronos] def tickWithClock(self: Job, now: Instant): Unit = {
       self.lastTick match {
         case None =>
           self.lastTick = Some(now)
@@ -57,7 +54,6 @@ object Job {
           }
         case _ =>
       }
-
     }
   }
 }
