@@ -4,6 +4,7 @@ import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.{ ActorRef, Behavior }
 import com.github.j5ik2o.chronos.core.Job
 
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.duration._
 
@@ -28,21 +29,22 @@ object JobSchedulerActor {
 
   private def running(
       schedulerId: UUID,
-      jobRefs: Map[UUID, ActorRef[JobProtocol.Command]]
+      jobRefs: Map[UUID, ActorRef[JobProtocol.Command]],
+      clock: () => Instant
   ): Behavior[JobSchedulerProtocol.Command] = {
     Behaviors.setup { ctx =>
       Behaviors.receiveMessagePartial {
         case JobSchedulerProtocol.AddJob(sid, job, replyTo) if schedulerId == sid =>
-          val jobRef     = ctx.spawn(JobActor(job), job.id.toString)
+          val jobRef     = ctx.spawn(JobActor(job, clock), job.id.toString)
           val newJobRefs = jobRefs + (job.id -> jobRef)
           replyTo ! JobSchedulerProtocol.AddJobSucceeded
-          running(schedulerId, newJobRefs)
+          running(schedulerId, newJobRefs, clock)
         case JobSchedulerProtocol.RemoveJob(sid, jobId, replyTo) if schedulerId == sid =>
           val jobRef = jobRefs.get(jobId)
           jobRef.foreach(ref => ctx.stop(ref))
           val newJobRefs = jobRefs - jobId
           replyTo ! JobSchedulerProtocol.RemoveJobSucceeded
-          running(schedulerId, newJobRefs)
+          running(schedulerId, newJobRefs, clock)
         case JobSchedulerProtocol.Stop(sid, replyTo) if schedulerId == sid =>
           replyTo ! JobSchedulerProtocol.Stopped
           Behaviors.stopped
@@ -55,11 +57,15 @@ object JobSchedulerActor {
     }
   }
 
-  def apply(id: UUID, tickInterval: Option[FiniteDuration] = None): Behavior[JobSchedulerProtocol.Command] = {
+  def apply(
+      id: UUID,
+      tickInterval: Option[FiniteDuration] = None,
+      clock: () => Instant = () => Instant.now()
+  ): Behavior[JobSchedulerProtocol.Command] = {
     Behaviors.setup[JobSchedulerProtocol.Command] { _ =>
       Behaviors.withTimers { timer =>
         tickInterval.foreach(d => timer.startTimerAtFixedRate(JobSchedulerProtocol.Tick(id), d))
-        running(id, Map.empty)
+        running(id, Map.empty, clock)
       }
     }
   }

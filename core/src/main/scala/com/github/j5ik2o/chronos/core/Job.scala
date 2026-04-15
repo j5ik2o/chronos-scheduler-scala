@@ -32,25 +32,28 @@ object Job {
   implicit object JobTicker extends Ticker[Job] {
 
     override def tick(self: Job): Unit = {
-      val now = Instant.now()
+      tickWithClock(self, Instant.now())
+    }
+
+    private[chronos] def tickWithClock(self: Job, now: Instant): Unit = {
       self.lastTick match {
         case None =>
           self.lastTick = Some(now)
         case Some(lt) if lt.plus(Duration.ofMillis(self.tickInterval.toMillis)).toEpochMilli <= now.toEpochMilli =>
-          if (self.limitMissedRuns > 0) {
-            if (self.schedule.upcoming(lt).take(self.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {
-              self.run()
-            }
-            self.lastTick = Some(now)
-          } else {
-            if (self.schedule.upcoming(lt).exists(_.toEpochMilli > now.toEpochMilli)) {
+          val nextOccurrences = self.schedule.upcoming(lt).drop(1)
+          val hasDue          = nextOccurrences.head.toEpochMilli <= now.toEpochMilli
+          if (hasDue) {
+            if (self.limitMissedRuns > 0) {
+              if (nextOccurrences.take(self.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {
+                self.run()
+              }
+            } else {
               self.run()
             }
             self.lastTick = Some(now)
           }
         case _ =>
       }
-
     }
   }
 }

@@ -7,6 +7,7 @@ import akka.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
 import com.github.j5ik2o.chronos.akka.JobSchedulerProtocol.{ AddJobReply, RemoveJobReply }
 import com.github.j5ik2o.chronos.core.Job
 
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.duration.FiniteDuration
 
@@ -22,7 +23,11 @@ object PersistentJobSchedulerActor {
   case object EmptyState extends State
   case class JustState(schedulerId: UUID, jobs: Map[UUID, Job]) extends State
 
-  def apply(id: UUID, tickInterval: Option[FiniteDuration] = None): Behavior[JobSchedulerProtocol.Command] = {
+  def apply(
+      id: UUID,
+      tickInterval: Option[FiniteDuration] = None,
+      clock: () => Instant = () => Instant.now()
+  ): Behavior[JobSchedulerProtocol.Command] = {
     Behaviors.setup { ctx =>
       Behaviors.withTimers { timer =>
         tickInterval.foreach(d => timer.startTimerAtFixedRate(JobSchedulerProtocol.Tick(id), d))
@@ -37,16 +42,37 @@ object PersistentJobSchedulerActor {
                 }
             case (EmptyState, JobSchedulerProtocol.RemoveJob(sid, jobId, replyTo)) =>
               Effect
-                .persist(JobSchedulerEvents.JobRemoved(sid, jobId, replyTo)).thenReply(replyTo) { _ =>
+                .persist(JobSchedulerEvents.JobRemoved(sid, jobId, replyTo))
+                .thenRun { (_: State) =>
+                  ctx.child(jobId.toString).foreach(ref => ctx.stop(ref))
+                }
+                .thenReply(replyTo) { _ =>
+                  JobSchedulerProtocol.RemoveJobSucceeded
+                }
+            case (JustState(schedulerId, _), JobSchedulerProtocol.AddJob(sid, job, replyTo)) if schedulerId == sid =>
+              Effect
+                .persist(JobSchedulerEvents.JobAdded(sid, job, replyTo)).thenReply(replyTo) { _ =>
+                  JobSchedulerProtocol.AddJobSucceeded
+                }
+            case (JustState(schedulerId, _), JobSchedulerProtocol.RemoveJob(sid, jobId, replyTo))
+                if schedulerId == sid =>
+              Effect
+                .persist(JobSchedulerEvents.JobRemoved(sid, jobId, replyTo))
+                .thenRun { (_: State) =>
+                  ctx.child(jobId.toString).foreach(ref => ctx.stop(ref))
+                }
+                .thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.RemoveJobSucceeded
                 }
             case (JustState(schedulerId, _), JobSchedulerProtocol.Stop(sid, replyTo)) if schedulerId == sid =>
-              Effect.reply(replyTo)(JobSchedulerProtocol.Stopped)
+              Effect.stop().thenReply(replyTo) { _ =>
+                JobSchedulerProtocol.Stopped
+              }
             case (JustState(schedulerId, jobs), JobSchedulerProtocol.Tick(sid)) if schedulerId == sid =>
               jobs.foreach { case (_, job) =>
                 val jobRef = ctx.child(job.id.toString) match {
                   case Some(ref) => ref.unsafeUpcast[JobProtocol.Command]
-                  case None      => ctx.spawn(JobActor(job), job.id.toString)
+                  case None      => ctx.spawn(JobActor(job, clock), job.id.toString)
                 }
                 jobRef ! JobProtocol.Tick
               }

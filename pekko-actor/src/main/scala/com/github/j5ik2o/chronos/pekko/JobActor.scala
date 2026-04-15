@@ -15,7 +15,7 @@ object JobProtocol {
 
 object JobActor {
 
-  private def started(job: Job)(
+  private def started(job: Job, clock: () => Instant)(
       lastTick: Option[Instant]
   ): Behavior[JobProtocol.Command] = {
     Behaviors.setup[JobProtocol.Command] { _ =>
@@ -24,36 +24,36 @@ object JobActor {
           Behaviors.same
         case JobProtocol.Run =>
           job.run()
-          notStarted(job)(lastTick)
+          notStarted(job, clock)(lastTick)
       }
     }
   }
 
-  private def notStarted(job: Job)(
+  private def notStarted(job: Job, clock: () => Instant)(
       lastTick: Option[Instant]
   ): Behavior[JobProtocol.Command] = {
     Behaviors.setup { ctx =>
       Behaviors.receiveMessagePartial { case JobProtocol.Tick =>
-        val now = Instant.now()
+        val now = clock()
         lastTick match {
           case None =>
-            notStarted(job)(Some(now))
+            notStarted(job, clock)(Some(now))
           case Some(lt) if lt.plus(Duration.ofMillis(job.tickInterval.toMillis)).toEpochMilli <= now.toEpochMilli =>
-            if (job.limitMissedRuns > 0)
-              if (
-                job.schedule.upcoming(lastTick.get).take(job.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)
-              ) {
+            val nextOccurrences = job.schedule.upcoming(lt).drop(1)
+            val hasDue          = nextOccurrences.head.toEpochMilli <= now.toEpochMilli
+            if (hasDue) {
+              if (job.limitMissedRuns > 0) {
+                if (nextOccurrences.take(job.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {
+                  ctx.self ! JobProtocol.Run
+                  started(job, clock)(Some(now))
+                } else
+                  notStarted(job, clock)(Some(now))
+              } else {
                 ctx.self ! JobProtocol.Run
-                started(job)(Some(now))
-              } else
-                notStarted(job)(Some(now))
-            else {
-              if (job.schedule.upcoming(lastTick.get).exists(_.toEpochMilli > now.toEpochMilli)) {
-                ctx.self ! JobProtocol.Run
-                started(job)(Some(now))
-              } else
-                notStarted(job)(Some(now))
-            }
+                started(job, clock)(Some(now))
+              }
+            } else
+              Behaviors.same
           case _ =>
             Behaviors.same
         }
@@ -62,9 +62,10 @@ object JobActor {
   }
 
   def apply(
-      job: Job
+      job: Job,
+      clock: () => Instant = () => Instant.now()
   ): Behavior[JobProtocol.Command] = {
-    notStarted(job)(None)
+    notStarted(job, clock)(None)
   }
 
 }
