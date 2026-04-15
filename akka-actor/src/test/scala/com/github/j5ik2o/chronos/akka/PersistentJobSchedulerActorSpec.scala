@@ -28,8 +28,8 @@ class PersistentJobSchedulerActorSpec
 
   "PersistentJobSchedulerActor" - {
     "job fires only on cron boundary" in {
-      val zoneId   = ZoneId.of("UTC")
-      val mockTime = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
+      val zoneId               = ZoneId.of("UTC")
+      val mockTime             = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
       val clock: () => Instant = () => mockTime.get()
       var counter              = 0
       val id                   = UUID.randomUUID()

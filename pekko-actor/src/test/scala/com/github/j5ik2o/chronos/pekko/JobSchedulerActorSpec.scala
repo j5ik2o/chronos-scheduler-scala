@@ -14,8 +14,8 @@ class JobSchedulerActorSpec extends AnyFunSuite {
   val testKit: ActorTestKit = ActorTestKit()
 
   test("job fires only on cron boundary") {
-    val zoneId   = ZoneId.of("UTC")
-    val mockTime = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
+    val zoneId               = ZoneId.of("UTC")
+    val mockTime             = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
     val clock: () => Instant = () => mockTime.get()
     var counter              = 0
     val id                   = UUID.randomUUID()
@@ -63,8 +63,8 @@ class JobSchedulerActorSpec extends AnyFunSuite {
   }
 
   test("job does not fire when limitMissedRuns exceeded") {
-    val zoneId   = ZoneId.of("UTC")
-    val mockTime = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
+    val zoneId               = ZoneId.of("UTC")
+    val mockTime             = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
     val clock: () => Instant = () => mockTime.get()
     var counter              = 0
     val id                   = UUID.randomUUID()
@@ -94,8 +94,8 @@ class JobSchedulerActorSpec extends AnyFunSuite {
   }
 
   test("rapid ticks do not cause errors") {
-    val zoneId   = ZoneId.of("UTC")
-    val mockTime = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
+    val zoneId               = ZoneId.of("UTC")
+    val mockTime             = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
     val clock: () => Instant = () => mockTime.get()
     var counter              = 0
     val id                   = UUID.randomUUID()

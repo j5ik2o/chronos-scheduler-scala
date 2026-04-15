@@ -40,7 +40,7 @@ object JobActor {
             notStarted(job, clock)(Some(now))
           case Some(lt) if lt.plus(Duration.ofMillis(job.tickInterval.toMillis)).toEpochMilli <= now.toEpochMilli =>
             val nextOccurrences = job.schedule.upcoming(lt).drop(1)
-            val hasDue = nextOccurrences.head.toEpochMilli <= now.toEpochMilli
+            val hasDue          = nextOccurrences.head.toEpochMilli <= now.toEpochMilli
             if (hasDue) {
               if (job.limitMissedRuns > 0) {
                 if (nextOccurrences.take(job.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {

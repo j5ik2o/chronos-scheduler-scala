@@ -41,7 +41,7 @@ object Job {
           self.lastTick = Some(now)
         case Some(lt) if lt.plus(Duration.ofMillis(self.tickInterval.toMillis)).toEpochMilli <= now.toEpochMilli =>
           val nextOccurrences = self.schedule.upcoming(lt).drop(1)
-          val hasDue = nextOccurrences.head.toEpochMilli <= now.toEpochMilli
+          val hasDue          = nextOccurrences.head.toEpochMilli <= now.toEpochMilli
           if (hasDue) {
             if (self.limitMissedRuns > 0) {
               if (nextOccurrences.take(self.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {
