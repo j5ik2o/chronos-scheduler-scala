@@ -18,6 +18,12 @@ case class Job(
   @transient
   val schedule: CronSchedule = CronSchedule(cronExpression, zoneId)
 
+  @transient
+  private var _clock: () => Instant = () => Instant.now()
+
+  def clock: () => Instant = _clock
+  def clock_=(value: () => Instant): Unit = { _clock = value }
+
   private var _lastTick: Option[Instant] = None
 
   def lastTick_=(value: Option[Instant]): Unit = {
@@ -32,18 +38,19 @@ object Job {
   implicit object JobTicker extends Ticker[Job] {
 
     override def tick(self: Job): Unit = {
-      val now = Instant.now()
+      val now = self.clock()
       self.lastTick match {
         case None =>
           self.lastTick = Some(now)
         case Some(lt) if lt.plus(Duration.ofMillis(self.tickInterval.toMillis)).toEpochMilli <= now.toEpochMilli =>
-          if (self.limitMissedRuns > 0) {
-            if (self.schedule.upcoming(lt).take(self.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {
-              self.run()
-            }
-            self.lastTick = Some(now)
-          } else {
-            if (self.schedule.upcoming(lt).exists(_.toEpochMilli > now.toEpochMilli)) {
+          val nextOccurrences = self.schedule.upcoming(lt).drop(1)
+          val hasDue = nextOccurrences.head.toEpochMilli <= now.toEpochMilli
+          if (hasDue) {
+            if (self.limitMissedRuns > 0) {
+              if (nextOccurrences.take(self.limitMissedRuns).exists(_.toEpochMilli > now.toEpochMilli)) {
+                self.run()
+              }
+            } else {
               self.run()
             }
             self.lastTick = Some(now)
