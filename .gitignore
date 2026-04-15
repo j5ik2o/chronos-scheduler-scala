@@ -30,3 +30,4 @@ dump.rdb
 dumps/
 .bsp/
 .bloop/
+.claude/settings.local.json
