@@ -39,7 +39,7 @@ jobs:
         default_bump: patch
       if: steps.changes.outputs.count > 0
     - name: Create a GitHub release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         tag_name: ${{ steps.tag_version.outputs.new_tag }}
         name: Release ${{ steps.tag_version.outputs.new_tag }}
