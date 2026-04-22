@@ -49,6 +49,8 @@ object PersistentJobSchedulerActor {
                 .thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.RemoveJobSucceeded
                 }
+            case (EmptyState, JobSchedulerProtocol.Tick(_)) =>
+              Effect.noReply
             case (JustState(schedulerId, _), JobSchedulerProtocol.AddJob(sid, job, replyTo)) if schedulerId == sid =>
               Effect
                 .persist(JobSchedulerEvents.JobAdded(sid, job, replyTo)).thenReply(replyTo) { _ =>
@@ -64,9 +66,9 @@ object PersistentJobSchedulerActor {
                 .thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.RemoveJobSucceeded
                 }
-            case (JustState(schedulerId, _), JobSchedulerProtocol.Stop(sid, replyTo)) if schedulerId == sid =>
+            case (JustState(schedulerId, _), JobSchedulerProtocol.Shutdown(sid, replyTo)) if schedulerId == sid =>
               Effect.stop().thenReply(replyTo) { _ =>
-                JobSchedulerProtocol.Stopped
+                JobSchedulerProtocol.ShutdownCompleted
               }
             case (JustState(schedulerId, jobs), JobSchedulerProtocol.Tick(sid)) if schedulerId == sid =>
               jobs.foreach { case (_, job) =>

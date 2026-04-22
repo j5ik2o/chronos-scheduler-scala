@@ -21,8 +21,8 @@ object JobSchedulerProtocol {
   case class RemoveJobFailed(ex: Throwable) extends RemoveJobReply
 
   case class Tick(schedulerId: UUID) extends Command
-  case class Stop(schedulerId: UUID, replyTo: ActorRef[Stopped.type]) extends Command
-  case object Stopped extends Command
+  case class Shutdown(schedulerId: UUID, replyTo: ActorRef[ShutdownCompleted.type]) extends Command
+  case object ShutdownCompleted extends Command
 }
 
 object JobSchedulerActor {
@@ -45,8 +45,8 @@ object JobSchedulerActor {
           val newJobRefs = jobRefs - jobId
           replyTo ! JobSchedulerProtocol.RemoveJobSucceeded
           running(schedulerId, newJobRefs, clock)
-        case JobSchedulerProtocol.Stop(sid, replyTo) if schedulerId == sid =>
-          replyTo ! JobSchedulerProtocol.Stopped
+        case JobSchedulerProtocol.Shutdown(sid, replyTo) if schedulerId == sid =>
+          replyTo ! JobSchedulerProtocol.ShutdownCompleted
           Behaviors.stopped
         case JobSchedulerProtocol.Tick(sid) if schedulerId == sid =>
           jobRefs.foreach { case (_, jobRef) =>
