@@ -11,21 +11,21 @@ object JobSchedulerProtocol {
   sealed trait Command
   case class AddJob(schedulerId: UUID, job: Job[_], replyTo: ActorRef[AddJobReply]) extends Command
   sealed trait AddJobReply
-  case object AddJobSucceeded                       extends AddJobReply
-  case class AddJobFailed(ex: Throwable)            extends AddJobReply
+  case object AddJobSucceeded extends AddJobReply
+  case class AddJobFailed(ex: Throwable) extends AddJobReply
 
   case class RemoveJob(schedulerId: UUID, jobId: UUID, replyTo: ActorRef[RemoveJobReply]) extends Command
   sealed trait RemoveJobReply
-  case object RemoveJobSucceeded                    extends RemoveJobReply
-  case class RemoveJobFailed(ex: Throwable)         extends RemoveJobReply
+  case object RemoveJobSucceeded extends RemoveJobReply
+  case class RemoveJobFailed(ex: Throwable) extends RemoveJobReply
 
   case class GetJobs(schedulerId: UUID, replyTo: ActorRef[GetJobsReply]) extends Command
   sealed trait GetJobsReply
-  case class GetJobsResponse(jobs: Seq[Job[_]])     extends GetJobsReply
+  case class GetJobsResponse(jobs: Seq[Job[_]]) extends GetJobsReply
 
-  case class Tick(schedulerId: UUID)                                                      extends Command
-  case class Shutdown(schedulerId: UUID, replyTo: ActorRef[ShutdownCompleted.type])       extends Command
-  case object ShutdownCompleted                     extends Command
+  case class Tick(schedulerId: UUID) extends Command
+  case class Shutdown(schedulerId: UUID, replyTo: ActorRef[ShutdownCompleted.type]) extends Command
+  case object ShutdownCompleted extends Command
 }
 
 object JobSchedulerActor {

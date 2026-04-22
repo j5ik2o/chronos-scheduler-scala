@@ -16,7 +16,7 @@ object AkkaActorMain extends App {
 
   sealed trait Command
   case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
-  case class WorkerMessage(msg: AppMessage)                               extends Command
+  case class WorkerMessage(msg: AppMessage) extends Command
 
   val system: ActorSystem[Command] = ActorSystem(apply, "job-scheduler-actor-main")
 
@@ -26,10 +26,9 @@ object AkkaActorMain extends App {
     val id      = UUID.randomUUID()
 
     val workerRef = ctx.spawn(
-      Behaviors.receiveMessage[AppMessage] {
-        case PrintMessage(text) =>
-          println(text)
-          Behaviors.same
+      Behaviors.receiveMessage[AppMessage] { case PrintMessage(text) =>
+        println(text)
+        Behaviors.same
       },
       "worker"
     )

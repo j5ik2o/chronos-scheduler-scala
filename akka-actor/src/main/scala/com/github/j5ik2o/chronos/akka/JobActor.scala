@@ -19,13 +19,13 @@ case class Job[CMD](
     @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS) message: CMD
 ) extends CborSerializable {
   @JsonIgnore private[chronos] lazy val schedule: CronSchedule = CronSchedule(cronExpression, zoneId)
-  @JsonIgnore private[chronos] def dispatch(): Unit             = sendTo ! message
+  @JsonIgnore private[chronos] def dispatch(): Unit            = sendTo ! message
 }
 
 object JobProtocol {
   sealed trait Command
   case object Tick extends Command
-  case object Run  extends Command
+  case object Run extends Command
 }
 
 object JobActor {

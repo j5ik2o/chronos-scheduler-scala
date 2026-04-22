@@ -12,15 +12,15 @@ import scala.concurrent.duration.FiniteDuration
 
 object JobSchedulerEvents {
   sealed trait Event extends CborSerializable
-  case class JobAdded(schedulerId: UUID, job: Job[_], replyTo: ActorRef[AddJobReply])    extends Event
+  case class JobAdded(schedulerId: UUID, job: Job[_], replyTo: ActorRef[AddJobReply]) extends Event
   case class JobRemoved(schedulerId: UUID, jobID: UUID, replyTo: ActorRef[RemoveJobReply]) extends Event
 }
 
 object PersistentJobSchedulerActor {
 
   sealed trait State
-  case object EmptyState                                              extends State
-  case class JustState(schedulerId: UUID, jobs: Map[UUID, Job[_]])   extends State
+  case object EmptyState extends State
+  case class JustState(schedulerId: UUID, jobs: Map[UUID, Job[_]]) extends State
 
   def apply(
       id: UUID,

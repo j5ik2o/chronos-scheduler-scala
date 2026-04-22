@@ -24,7 +24,7 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     val jobSchedulerActorRef = testKit.spawn(JobSchedulerActor(id, clock = clock))
 
     val reply = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
-    val job = Job(
+    val job   = Job(
       id = UUID.randomUUID(),
       cronExpression = "*/1 * * * *",
       zoneId,
@@ -69,7 +69,7 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     val jobSchedulerActorRef = testKit.spawn(JobSchedulerActor(id, clock = clock))
 
     val reply = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
-    val job = Job(
+    val job   = Job(
       id = UUID.randomUUID(),
       cronExpression = "*/1 * * * *",
       zoneId,
@@ -128,7 +128,7 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     val jobSchedulerActorRef = testKit.spawn(JobSchedulerActor(id, clock = clock))
 
     val reply = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
-    val job = Job(
+    val job   = Job(
       id = UUID.randomUUID(),
       cronExpression = "*/1 * * * *",
       zoneId,
