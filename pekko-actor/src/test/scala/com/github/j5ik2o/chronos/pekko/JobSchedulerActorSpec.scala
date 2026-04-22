@@ -119,6 +119,33 @@ class JobSchedulerActorSpec extends AnyFunSuite {
     assert(response.jobs.map(_.id) == Seq(job.id))
   }
 
+  test("GetJobs returns added jobs") {
+    val zoneId = ZoneId.of("UTC")
+    val id     = UUID.randomUUID()
+
+    val jobSchedulerActorRef = testKit.spawn(JobSchedulerActor(id))
+    val addReply             = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
+    val getReply             = testKit.createTestProbe[JobSchedulerProtocol.GetJobsReply]()
+
+    val job = Job(
+      id = UUID.randomUUID(),
+      cronExpression = "*/1 * * * *",
+      zoneId,
+      tickInterval = 500.millis,
+      run = { () => () }
+    )
+
+    jobSchedulerActorRef ! JobSchedulerProtocol.GetJobs(id, getReply.ref)
+    getReply.expectMessage(JobSchedulerProtocol.GetJobsResponse(Seq.empty))
+
+    jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(id, job, addReply.ref)
+    addReply.expectMessage(JobSchedulerProtocol.AddJobSucceeded)
+
+    jobSchedulerActorRef ! JobSchedulerProtocol.GetJobs(id, getReply.ref)
+    val response = getReply.expectMessageType[JobSchedulerProtocol.GetJobsResponse]
+    assert(response.jobs.map(_.id) == Seq(job.id))
+  }
+
   test("rapid ticks do not cause errors") {
     val zoneId               = ZoneId.of("UTC")
     val mockTime             = new AtomicReference[Instant](Instant.parse("2024-01-01T12:00:00Z"))
