@@ -130,13 +130,13 @@ class PersistentJobSchedulerActorSpec
       removeReply.expectMessage(JobSchedulerProtocol.RemoveJobSucceeded)
     }
 
-    "stop in JustState" in {
+    "shutdown in JustState" in {
       val zoneId = ZoneId.systemDefault()
       val id     = UUID.randomUUID()
 
       val jobSchedulerActorRef = testKit.spawn(PersistentJobSchedulerActor(id))
       val addReply             = testKit.createTestProbe[JobSchedulerProtocol.AddJobReply]()
-      val stopReply            = testKit.createTestProbe[JobSchedulerProtocol.Stopped.type]()
+      val shutdownReply        = testKit.createTestProbe[JobSchedulerProtocol.ShutdownCompleted.type]()
 
       val job = Job(
         id = UUID.randomUUID(),
@@ -149,8 +149,8 @@ class PersistentJobSchedulerActorSpec
       jobSchedulerActorRef ! JobSchedulerProtocol.AddJob(id, job, addReply.ref)
       addReply.expectMessage(JobSchedulerProtocol.AddJobSucceeded)
 
-      jobSchedulerActorRef ! JobSchedulerProtocol.Stop(id, stopReply.ref)
-      stopReply.expectMessage(JobSchedulerProtocol.Stopped)
+      jobSchedulerActorRef ! JobSchedulerProtocol.Shutdown(id, shutdownReply.ref)
+      shutdownReply.expectMessage(JobSchedulerProtocol.ShutdownCompleted)
 
       testKit.createTestProbe().expectTerminated(jobSchedulerActorRef)
     }
