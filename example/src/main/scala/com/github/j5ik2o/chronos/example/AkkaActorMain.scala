@@ -3,8 +3,7 @@ package com.github.j5ik2o.chronos.example
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorSystem, Behavior }
 import com.github.j5ik2o.chronos.akka.JobSchedulerProtocol.AddJobSucceeded
-import com.github.j5ik2o.chronos.akka.{ JobSchedulerActor, JobSchedulerProtocol }
-import com.github.j5ik2o.chronos.core.Job
+import com.github.j5ik2o.chronos.akka.{ CborSerializable, Job, JobSchedulerActor, JobSchedulerProtocol }
 
 import java.time.ZoneId
 import java.util.UUID
@@ -12,15 +11,25 @@ import scala.concurrent.duration._
 
 object AkkaActorMain extends App {
 
-  val system: ActorSystem[Command] = ActorSystem(apply, "job-scheduler-actor-main")
+  sealed trait AppMessage extends CborSerializable
+  case class PrintMessage(text: String) extends AppMessage
 
   sealed trait Command
   case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
 
+  val system: ActorSystem[Command] = ActorSystem(apply, "job-scheduler-actor-main")
+
   def apply: Behavior[Command] = Behaviors.setup[Command] { ctx =>
-    val zoneId  = ZoneId.systemDefault()
-    var counter = 0
-    val id      = UUID.randomUUID()
+    val zoneId = ZoneId.systemDefault()
+    val id     = UUID.randomUUID()
+
+    val workerRef = ctx.spawn(
+      Behaviors.receiveMessage[AppMessage] { case PrintMessage(text) =>
+        println(text)
+        Behaviors.same
+      },
+      "worker"
+    )
 
     val jobSchedulerActorRef = ctx.spawn(JobSchedulerActor(id, Some(500.millis)), "job-scheduler-actor")
 
@@ -30,13 +39,12 @@ object AkkaActorMain extends App {
         id = UUID.randomUUID(),
         cronExpression = "*/1 * * * *",
         zoneId,
-        run = { () =>
-          println(s"run job: $counter")
-          counter += 1
-        }
+        sendTo = workerRef,
+        message = PrintMessage("run job")
       ),
-      ctx.messageAdapter[JobSchedulerProtocol.AddJobReply](ref => WrappedAddJobReply(ref))
+      ctx.messageAdapter[JobSchedulerProtocol.AddJobReply](WrappedAddJobReply(_))
     )
+
     Behaviors.receiveMessagePartial[Command] { case WrappedAddJobReply(AddJobSucceeded) =>
       Behaviors.same
     }

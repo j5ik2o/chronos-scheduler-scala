@@ -5,7 +5,6 @@ import org.apache.pekko.actor.typed.{ ActorRef, Behavior }
 import org.apache.pekko.persistence.typed.PersistenceId
 import org.apache.pekko.persistence.typed.scaladsl.{ Effect, EventSourcedBehavior }
 import com.github.j5ik2o.chronos.pekko.JobSchedulerProtocol.{ AddJobReply, RemoveJobReply }
-import com.github.j5ik2o.chronos.core.Job
 
 import java.time.Instant
 import java.util.UUID
@@ -13,7 +12,7 @@ import scala.concurrent.duration.FiniteDuration
 
 object JobSchedulerEvents {
   sealed trait Event extends CborSerializable
-  case class JobAdded(schedulerId: UUID, job: Job, replyTo: ActorRef[AddJobReply]) extends Event
+  case class JobAdded(schedulerId: UUID, job: Job[_], replyTo: ActorRef[AddJobReply]) extends Event
   case class JobRemoved(schedulerId: UUID, jobID: UUID, replyTo: ActorRef[RemoveJobReply]) extends Event
 }
 
@@ -21,7 +20,7 @@ object PersistentJobSchedulerActor {
 
   sealed trait State
   case object EmptyState extends State
-  case class JustState(schedulerId: UUID, jobs: Map[UUID, Job]) extends State
+  case class JustState(schedulerId: UUID, jobs: Map[UUID, Job[_]]) extends State
 
   def apply(
       id: UUID,
@@ -51,6 +50,8 @@ object PersistentJobSchedulerActor {
                 }
             case (EmptyState, JobSchedulerProtocol.Tick(_)) =>
               Effect.noReply
+            case (EmptyState, JobSchedulerProtocol.GetJobs(_, replyTo)) =>
+              Effect.reply(replyTo)(JobSchedulerProtocol.GetJobsResponse(Seq.empty))
             case (JustState(schedulerId, _), JobSchedulerProtocol.AddJob(sid, job, replyTo)) if schedulerId == sid =>
               Effect
                 .persist(JobSchedulerEvents.JobAdded(sid, job, replyTo)).thenReply(replyTo) { _ =>
@@ -66,6 +67,8 @@ object PersistentJobSchedulerActor {
                 .thenReply(replyTo) { _ =>
                   JobSchedulerProtocol.RemoveJobSucceeded
                 }
+            case (JustState(schedulerId, jobs), JobSchedulerProtocol.GetJobs(sid, replyTo)) if schedulerId == sid =>
+              Effect.reply(replyTo)(JobSchedulerProtocol.GetJobsResponse(jobs.values.toSeq))
             case (JustState(schedulerId, _), JobSchedulerProtocol.Shutdown(sid, replyTo)) if schedulerId == sid =>
               Effect.stop().thenReply(replyTo) { _ =>
                 JobSchedulerProtocol.ShutdownCompleted
@@ -89,7 +92,6 @@ object PersistentJobSchedulerActor {
               JustState(schedulerId, jobs - jobId)
           }
         )
-
       }
     }
   }

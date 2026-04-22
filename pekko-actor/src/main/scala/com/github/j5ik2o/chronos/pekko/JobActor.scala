@@ -1,21 +1,36 @@
 package com.github.j5ik2o.chronos.pekko
 
-import org.apache.pekko.actor.typed.Behavior
+import org.apache.pekko.actor.typed.{ ActorRef, Behavior }
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
-import com.github.j5ik2o.chronos.core.Job
+import com.fasterxml.jackson.annotation.{ JsonIgnore, JsonTypeInfo }
+import com.github.j5ik2o.cron.CronSchedule
 
-import java.time.{ Duration, Instant }
+import java.time.{ Duration, Instant, ZoneId }
+import java.util.UUID
+import scala.concurrent.duration._
+
+case class Job[CMD](
+    id: UUID,
+    cronExpression: String,
+    zoneId: ZoneId,
+    limitMissedRuns: Int = 5,
+    tickInterval: FiniteDuration = 1.minutes,
+    sendTo: ActorRef[CMD],
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS) message: CMD
+) extends CborSerializable {
+  @JsonIgnore private[chronos] lazy val schedule: CronSchedule = CronSchedule(cronExpression, zoneId)
+  @JsonIgnore private[chronos] def dispatch(): Unit            = sendTo ! message
+}
 
 object JobProtocol {
   sealed trait Command
   case object Tick extends Command
   case object Run extends Command
-
 }
 
 object JobActor {
 
-  private def started(job: Job, clock: () => Instant)(
+  private def started(job: Job[_], clock: () => Instant)(
       lastTick: Option[Instant]
   ): Behavior[JobProtocol.Command] = {
     Behaviors.setup[JobProtocol.Command] { _ =>
@@ -23,13 +38,13 @@ object JobActor {
         case JobProtocol.Tick =>
           Behaviors.same
         case JobProtocol.Run =>
-          job.run()
+          job.dispatch()
           notStarted(job, clock)(lastTick)
       }
     }
   }
 
-  private def notStarted(job: Job, clock: () => Instant)(
+  private def notStarted(job: Job[_], clock: () => Instant)(
       lastTick: Option[Instant]
   ): Behavior[JobProtocol.Command] = {
     Behaviors.setup { ctx =>
@@ -62,7 +77,7 @@ object JobActor {
   }
 
   def apply(
-      job: Job,
+      job: Job[_],
       clock: () => Instant = () => Instant.now()
   ): Behavior[JobProtocol.Command] = {
     notStarted(job, clock)(None)
