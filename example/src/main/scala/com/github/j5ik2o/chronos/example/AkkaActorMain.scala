@@ -16,14 +16,12 @@ object AkkaActorMain extends App {
 
   sealed trait Command
   case class WrappedAddJobReply(reply: JobSchedulerProtocol.AddJobReply) extends Command
-  case class WorkerMessage(msg: AppMessage) extends Command
 
   val system: ActorSystem[Command] = ActorSystem(apply, "job-scheduler-actor-main")
 
   def apply: Behavior[Command] = Behaviors.setup[Command] { ctx =>
-    val zoneId  = ZoneId.systemDefault()
-    var counter = 0
-    val id      = UUID.randomUUID()
+    val zoneId = ZoneId.systemDefault()
+    val id     = UUID.randomUUID()
 
     val workerRef = ctx.spawn(
       Behaviors.receiveMessage[AppMessage] { case PrintMessage(text) =>
@@ -42,13 +40,12 @@ object AkkaActorMain extends App {
         cronExpression = "*/1 * * * *",
         zoneId,
         sendTo = workerRef,
-        message = PrintMessage(s"run job: ${counter}")
+        message = PrintMessage("run job")
       ),
-      ctx.messageAdapter[JobSchedulerProtocol.AddJobReply](ref => WrappedAddJobReply(ref))
+      ctx.messageAdapter[JobSchedulerProtocol.AddJobReply](WrappedAddJobReply(_))
     )
 
     Behaviors.receiveMessagePartial[Command] { case WrappedAddJobReply(AddJobSucceeded) =>
-      counter += 1
       Behaviors.same
     }
   }
