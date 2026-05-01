@@ -94,7 +94,7 @@ val `akka-actor` = (project in file("akka-actor"))
   )
   .dependsOn(core)
 
-val PekkoVersion = "1.5.0"
+val PekkoVersion = "1.6.0"
 
 val `pekko-actor` = (project in file("pekko-actor"))
   .settings(baseSettings)
