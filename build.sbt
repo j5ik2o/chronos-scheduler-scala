@@ -70,7 +70,7 @@ val core = (project in file("core"))
     crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
     libraryDependencies ++= Seq(
       "com.github.j5ik2o" %% "chronos-parser-scala" % "1.1.5",
-      "org.slf4j"          % "slf4j-api"            % "2.0.17",
+      "org.slf4j"          % "slf4j-api"            % "2.0.18",
       "org.scalatest"     %% "scalatest"            % "3.2.20" % Test,
       "ch.qos.logback"     % "logback-classic"      % "1.5.32" % Test
     )
