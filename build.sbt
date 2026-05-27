@@ -72,7 +72,7 @@ val core = (project in file("core"))
       "com.github.j5ik2o" %% "chronos-parser-scala" % "1.1.5",
       "org.slf4j"          % "slf4j-api"            % "2.0.18",
       "org.scalatest"     %% "scalatest"            % "3.2.20" % Test,
-      "ch.qos.logback"     % "logback-classic"      % "1.5.32" % Test
+      "ch.qos.logback"     % "logback-classic"      % "1.5.33" % Test
     )
   )
 
@@ -89,7 +89,7 @@ val `akka-actor` = (project in file("akka-actor"))
       "com.typesafe.akka" %% "akka-persistence-typed"     % AkkaVersion,
       "com.typesafe.akka" %% "akka-actor-testkit-typed"   % AkkaVersion % Test,
       "org.scalatest"     %% "scalatest"                  % "3.2.20"    % Test,
-      "ch.qos.logback"     % "logback-classic"            % "1.5.32"    % Test
+      "ch.qos.logback"     % "logback-classic"            % "1.5.33"    % Test
     )
   )
   .dependsOn(core)
@@ -107,7 +107,7 @@ val `pekko-actor` = (project in file("pekko-actor"))
       "org.apache.pekko" %% "pekko-persistence-typed"     % PekkoVersion,
       "org.apache.pekko" %% "pekko-actor-testkit-typed"   % PekkoVersion % Test,
       "org.scalatest"    %% "scalatest"                   % "3.2.20"     % Test,
-      "ch.qos.logback"    % "logback-classic"             % "1.5.32"     % Test
+      "ch.qos.logback"    % "logback-classic"             % "1.5.33"     % Test
     )
   )
   .dependsOn(core)
@@ -119,7 +119,7 @@ val `example` = (project in file("example"))
     crossScalaVersions := Seq(Versions.scala213Version, Versions.scala3Version),
     publish / skip := true,
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % "1.5.32"
+      "ch.qos.logback" % "logback-classic" % "1.5.33"
     )
   )
   .dependsOn(core, `akka-actor`)
