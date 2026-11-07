@@ -1,5 +1,5 @@
 [tools]
 java = "temurin-17.0.21+9"
-"npm:@fission-ai/openspec" = "1.14.3"
+"npm:@fission-ai/openspec" = "1.16.1"
 codex = "0.120.0"
 claude = "2.1.319"
